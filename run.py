@@ -272,35 +272,33 @@ def _maybe_prompt_update() -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="游资（UZI）Skills · 个股深度分析",
-        epilog="示例: python run.py 贵州茅台 --remote",
+        description="UZI Skills (US edition) · US-stock deep analysis",
+        epilog="Example: python run.py AAPL --remote",
     )
-    parser.add_argument("ticker", nargs="?", default="002273.SZ",
-                        help="股票代码或中文名 (如 600519.SH / AAPL / 贵州茅台)")
+    parser.add_argument("ticker", nargs="?", default="AAPL",
+                        help="US ticker symbol (e.g. AAPL / MSFT / BRK.B)")
     parser.add_argument("--remote", action="store_true",
-                        help="分析完后用 Cloudflare Tunnel 映射公网链接")
+                        help="Expose the finished report over a public Cloudflare Tunnel link")
     parser.add_argument("--no-browser", action="store_true",
-                        help="不自动打开浏览器")
+                        help="Do not auto-open the browser")
     parser.add_argument("--port", type=int, default=8976,
-                        help="HTTP 服务端口 (默认 8976)")
-    parser.add_argument("--force-name", metavar="CODE",
-                        help="绕过中文名纠错直接使用指定代码 (如 --force-name 000582.SZ)")
+                        help="HTTP server port (default 8976)")
+    parser.add_argument("--force-name", metavar="TICKER",
+                        help="Use this exact ticker, skipping name resolution (e.g. --force-name BRK.B)")
     parser.add_argument("--no-resume", action="store_true",
-                        help="v2.6 · 强制重抓所有 fetcher（默认 resume：复用 .cache/{ticker}/raw_data.json 已有维度）")
-    parser.add_argument("--enable-xueqiu-login", action="store_true",
-                        help="v2.7.1 · 启用 XueQiu Playwright 登录态抓取实盘比赛持仓（首次需 `python -m lib.xueqiu_browser login`）")
+                        help="Force re-fetch of every fetcher (default resumes from .cache/{ticker}/raw_data.json)")
     parser.add_argument("--depth", choices=["lite", "medium", "deep"], default=None,
-                        help="v2.10.2 · 思考深度 · lite(1-2min) / medium(5-8min · 默认) / deep(15-20min · 含 Bull-Bear 辩论 + Segmental)")
-    parser.add_argument("--school", choices=["A", "B", "C", "D", "E", "F", "G", "H", "I"], default=None,
-                        help="v3.5.0 · 锁定单一流派视角 · A价值/B成长/C宏观/D技术/E中国价投/F游资/G量化/H科技领袖派/I Serenity卡位猎手 · 其他派评委 skip · 报告顶部标注")
+                        help="Thinking depth · lite (1-2min) / medium (5-8min · default) / deep (15-20min · adds Bull-Bear debate + Segmental)")
+    parser.add_argument("--school", choices=["A", "B", "C", "D", "G", "H", "I"], default=None,
+                        help="Lock to a single school's lens · A Value / B Growth / C Macro / D Technical / G Quant / H Tech-leaders / I Serenity (AI bottleneck hunter) · other jurors skipped · noted at the top of the report")
     parser.add_argument("--versus", nargs="+", metavar="TICKER",
-                        help="v3.6.0 · 多股横向对比模式 · 接受 2-4 个代码 / 中文名 · 输出单 HTML "
-                             "(如 --versus 600519.SH 000858.SZ · 自动 resume 复用 cache)")
+                        help="Head-to-head comparison · 2-4 US tickers · single HTML output "
+                             "(e.g. --versus AAPL MSFT · auto-resumes from cache)")
     parser.add_argument("--portfolio", metavar="CSV", default=None,
-                        help="v3.6.0 · 组合批量分析 · CSV 列含 ticker / weight / note · "
-                             "输出排名 + 加权评分 + 健康度 · 自动 resume")
+                        help="Batch portfolio analysis · CSV with ticker / weight / note columns · "
+                             "outputs ranking + weighted score + health · auto-resumes")
     parser.add_argument("--output-dir", metavar="DIR", default=None,
-                        help="v2.11.0 · SaaS 集成：把产出（standalone html + 图 + 摘要）拷贝到该目录，并在其中生成 index.html / report.meta.json。建议配合 --no-browser 使用。")
+                        help="SaaS integration: copy outputs (standalone HTML + images + summary) into this dir and generate index.html / report.meta.json. Pair with --no-browser.")
     args = parser.parse_args()
 
     # v2.10.5 · run.py 是 CLI 直跑入口（agent 流程走 stage1/stage2 直接调用，不经 run.py）。
@@ -321,28 +319,32 @@ def main():
     except Exception as _e:
         print(f"⚠️ 无法加载 analysis_profile: {_e}")
 
-    # v2.3 · --force-name 直接覆盖
+    # --force-name override
     if args.force_name:
         print(f"   [force-name] {args.ticker} → {args.force_name}")
         args.ticker = args.force_name
 
-    # v2.7.1 · XueQiu login opt-in
-    if args.enable_xueqiu_login:
-        os.environ["UZI_XQ_LOGIN"] = "1"
-        print("🔓 启用 XueQiu 登录态（19_contests 维度抓实盘组合）")
+    # US-only edition: reject A-share / HK / Chinese-name input before any work.
+    from lib.market_router import ensure_us_supported, UnsupportedMarketError
+    for _t in [args.ticker, *(args.versus or [])]:
+        try:
+            ensure_us_supported(_t)
+        except UnsupportedMarketError as _e:
+            print(f"\n❌ {_e}")
+            sys.exit(2)
 
-    # v3.5.0 · 单一流派视角锁定 · 通过 env 传给 investor_evaluator
+    # v3.5.0 · single-school lens lock · passed to investor_evaluator via env
     if args.school:
         os.environ["UZI_SCHOOL"] = args.school
-        _SCHOOL_NAMES = {"A": "价值派", "B": "成长派", "C": "宏观派", "D": "技术派",
-                         "E": "中国价投", "F": "A 股游资", "G": "量化",
-                         "H": "科技领袖派", "I": "Serenity · AI 卡位/瓶颈猎手"}
-        print(f"🎯 已锁定 {args.school} 派视角 · {_SCHOOL_NAMES.get(args.school, args.school)} · 其他派评委 skip")
+        _SCHOOL_NAMES = {"A": "Value", "B": "Growth", "C": "Macro", "D": "Technical",
+                         "G": "Quant", "H": "Tech leaders",
+                         "I": "Serenity · AI bottleneck hunter"}
+        print(f"🎯 Locked to school {args.school} · {_SCHOOL_NAMES.get(args.school, args.school)} · other jurors skipped")
 
-    # v3.6.0 · 横向对比模式 · 早返回 · 不走单股分析
+    # v3.6.0 · head-to-head comparison · early return
     if args.versus:
         if not (2 <= len(args.versus) <= 4):
-            print(f"❌ --versus 接受 2-4 个 ticker · 实际 {len(args.versus)}")
+            print(f"❌ --versus accepts 2-4 tickers · got {len(args.versus)}")
             sys.exit(2)
         from lib.versus_runner import run_versus
         result = run_versus(

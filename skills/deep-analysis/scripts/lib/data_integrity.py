@@ -55,16 +55,10 @@ ENRICHMENT_DIMS = [
     ("6_research",  "券商研报"),
     ("7_industry",  "行业景气"),
     ("8_materials", "原材料"),
-    ("9_futures",   "期货关联"),
     ("11_governance", "治理/减持"),
-    ("12_capital_flow", "北向/两融"),
-    ("13_policy",   "政策环境"),
     ("14_moat",     "护城河"),
     ("15_events",   "事件驱动"),
-    ("16_lhb",      "龙虎榜/游资"),
     ("17_sentiment","大V舆情"),
-    ("18_trap",     "杀猪盘"),
-    ("19_contests", "实盘比赛"),
 ]
 
 
@@ -189,17 +183,11 @@ _ENRICHMENT_HINTS: dict[str, list[str]] = {
     "5_chain":        ["browser: https://xueqiu.com/S/{code_raw}/F10", "ws: '{name} 上下游产业链'"],
     "6_research":     ["mx: '{code} 券商研报 目标价'", "ws: '{name} 最新研报 2026'"],
     "7_industry":     ["mx: '{industry} 行业规模 TAM'", "ws: '{industry} 行业景气 2026'"],
-    "8_materials":    ["ws: '{name} 原材料 成本构成'"],
-    "9_futures":      ["ws: '{industry} 期货 相关品种'"],
-    "11_governance":  ["mx: '{code} 股东结构 高管减持'", "browser: https://quote.eastmoney.com/{eastmoney_code}.html"],
-    "12_capital_flow":["mx: '{code} 北向持仓 融资融券'", "browser: https://data.eastmoney.com/zlsj/{code_raw}.html"],
-    "13_policy":      ["ws: '{industry} 最新政策 2026'"],
-    "14_moat":        ["ws: '{name} 核心竞争力 技术壁垒 市场份额'"],
-    "15_events":      ["mx: '{code} 最新公告'", "ws: '{name} {code} 最新公告 中标 研发 2026'"],
-    "16_lhb":         ["mx: '{code} 龙虎榜'", "browser: https://data.eastmoney.com/stock/lhb/{code_raw}.html"],
-    "17_sentiment":   ["browser: https://xueqiu.com/S/{code_raw}", "ws: 'site:xueqiu.com {code}'"],
-    "18_trap":        ["infer: 从龙虎榜+换手率+涨跌幅综合判断"],
-    "19_contests":    ["ws: '{code} 实盘比赛 持仓'"],
+    "8_materials":    ["ws: '{name} raw material cost structure'"],
+    "11_governance":  ["ws: '{name} insider transactions ownership 2026'"],
+    "14_moat":        ["ws: '{name} competitive advantage moat market share'"],
+    "15_events":      ["ws: '{name} {code} latest filings 8-K guidance 2026'"],
+    "17_sentiment":   ["ws: '{name} {code} stock sentiment retail'"],
 }
 
 

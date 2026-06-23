@@ -1,7 +1,13 @@
-"""Identify market (A / H / U) from a ticker or stock name and normalize the code.
+"""Identify market from a ticker or stock name and normalize the code.
 
-v2.9.2 · 扩展 `_a_share_suffix` 覆盖 ETF / LOF / 可转债 等非个股 6 位码
-        + 增加 `classify_security_type` 识别标的类型（stock/etf/lof/cb）
+US-only edition: this build of the analyzer supports **US-listed stocks only**.
+The A-share / Hong Kong parsing logic is retained so that non-US input can be
+detected and rejected with a clear message (see ``ensure_us_supported``), but the
+analysis pipeline itself only runs for US tickers.
+
+Historically this module classified A (mainland China) / H (Hong Kong) / U (US)
+markets; the ``Market`` literal keeps those values for backward-compatible
+branching, but fresh user input is constrained to ``U`` at the entry points.
 """
 from __future__ import annotations
 
@@ -207,6 +213,61 @@ def is_chinese_name(raw: str) -> bool:
     return any("\u4e00" <= ch <= "\u9fff" for ch in raw)
 
 
+# ═══════════════════════════════════════════════════════════════
+# US-only enforcement
+# ═══════════════════════════════════════════════════════════════
+
+class UnsupportedMarketError(ValueError):
+    """Raised when a non-US ticker/name is supplied to the US-only edition."""
+
+
+_MARKET_LABELS = {
+    "A": "a mainland China A-share",
+    "H": "a Hong Kong-listed",
+    "U": "a US-listed",
+}
+
+US_ONLY_HINT = (
+    "This is the US-market edition — only US-listed stocks are supported "
+    "(e.g. AAPL, MSFT, NVDA, AMZN, BRK.B). "
+    "Mainland China A-shares and Hong Kong tickers are not supported."
+)
+
+
+def is_us_input(raw: str) -> bool:
+    """True if ``raw`` looks like a US-listed ticker (no CJK, market == 'U')."""
+    if not raw or is_chinese_name(raw):
+        return False
+    try:
+        return parse_ticker(raw).market == "U"
+    except Exception:
+        return False
+
+
+def ensure_us_supported(raw: str) -> TickerInfo:
+    """Return the parsed TickerInfo for a US ticker, else raise UnsupportedMarketError.
+
+    Single guard used at every user entry point so A-share / HK / Chinese-name
+    input is rejected up front with an actionable English message instead of
+    silently flowing into data sources that no longer exist in this edition.
+    """
+    if is_chinese_name(raw):
+        raise UnsupportedMarketError(
+            f"{raw!r} looks like a Chinese company name. {US_ONLY_HINT} "
+            f"Please enter a US ticker symbol instead."
+        )
+    ti = parse_ticker(raw)
+    if ti.market != "U":
+        label = _MARKET_LABELS.get(ti.market, "a non-US")
+        raise UnsupportedMarketError(
+            f"{raw!r} parses as {label} ticker ({ti.full}). {US_ONLY_HINT}"
+        )
+    return ti
+
+
 if __name__ == "__main__":
-    for t in ["002273", "002273.SZ", "600519", "00700.HK", "00700", "AAPL", "BRK.B", "水晶光电"]:
-        print(t, "->", parse_ticker(t))
+    for t in ["AAPL", "MSFT", "BRK.B", "NVDA", "600519", "00700.HK"]:
+        try:
+            print(t, "->", ensure_us_supported(t))
+        except UnsupportedMarketError as e:
+            print(t, "-> REJECTED:", e)

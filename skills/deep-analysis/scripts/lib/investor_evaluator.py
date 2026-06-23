@@ -34,15 +34,13 @@ _INVESTOR_NAME_MAP: dict[str, str] = {inv["id"]: inv.get("name", "") for inv in 
 
 # v3.5.0 · 流派标签 · 用户用 --school 锁定单一视角时 · skip 其他派
 SCHOOL_LABELS: dict[str, str] = {
-    "A": "价值派",
-    "B": "成长派",
-    "C": "宏观派",
-    "D": "技术派",
-    "E": "中国价投",
-    "F": "A 股游资",
-    "G": "量化",
-    "H": "科技领袖派",
-    "I": "AI 卡位/瓶颈猎手",
+    "A": "Value",
+    "B": "Growth",
+    "C": "Macro",
+    "D": "Technical",
+    "G": "Quant",
+    "H": "Tech Leaders",
+    "I": "AI Bottleneck Hunter",
 }
 
 

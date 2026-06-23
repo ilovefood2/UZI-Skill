@@ -154,9 +154,6 @@ def score_dimensions(raw: dict) -> dict:
     # 8 · 原材料
     out["8_materials"] = {"score": 6, "weight": 3, "label": "原材料成本关注中"}
 
-    # 9 · 期货关联
-    out["9_futures"] = {"score": 5, "weight": 2, "label": "无强关联期货品种"}
-
     # 10 · 估值
     val = _get("10_valuation")
     pe_q_str = str(val.get("pe_quantile", ""))
@@ -184,32 +181,6 @@ def score_dimensions(raw: dict) -> dict:
     out["11_governance"] = {"score": min(10, score_11), "weight": 4,
                              "label": f"质押记录 {len(pledge) if isinstance(pledge, list) else '—'} · 内部交易 {'有' if has_insider else '无'}"}
 
-    # 12 · 资金面 (v2.2: 主力资金替代北向，北向已关停)
-    cap = _get("12_capital_flow")
-    main_flow = cap.get("main_fund_flow_20d") or []
-    main_5d_net = 0
-    if main_flow:
-        for rec in main_flow[:5]:
-            v = rec.get("主力净流入-净额", 0) if isinstance(rec, dict) else 0
-            try:
-                main_5d_net += float(v)
-            except (ValueError, TypeError):
-                pass
-    main_5d_label = f"{main_5d_net / 1e8:+.1f}亿" if main_5d_net else "—"
-    unlock = cap.get("unlock_schedule") or []
-    score_12 = 5
-    if main_5d_net > 0: score_12 += 2
-    elif main_5d_net < 0: score_12 -= 1
-    if len(unlock) == 0: score_12 += 1
-    score_12 = max(1, min(10, score_12))
-    out["12_capital_flow"] = {"score": score_12, "weight": 4,
-                               "label": f"主力 5日 {main_5d_label} · 12 个月解禁 {len(unlock)} 次",
-                               "reasons_pass": [f"主力资金 5 日净流入 {main_5d_label}"] if main_5d_net > 0 else [],
-                               "reasons_fail": [f"主力资金 5 日净流出 {main_5d_label}"] if main_5d_net < 0 else []}
-
-    # 13 · 政策
-    out["13_policy"] = {"score": 6, "weight": 3, "label": "政策环境中性"}
-
     # 14 · 护城河
     out["14_moat"] = {"score": 6, "weight": 3, "label": "护城河需定性评估"}
 
@@ -221,37 +192,12 @@ def score_dimensions(raw: dict) -> dict:
     out["15_events"] = {"score": score_15, "weight": 4,
                         "label": f"近期新闻 {len(news)} 条 · 公告 {len(notices)} 份"}
 
-    # 16 · 龙虎榜
-    lhb = _get("16_lhb")
-    lhb_count = lhb.get("lhb_count_30d", 0)
-    matched = lhb.get("matched_youzi") or []
-    score_16 = 5 + min(3, lhb_count // 2)
-    if matched: score_16 += 1
-    score_16 = min(10, score_16)
-    out["16_lhb"] = {"score": score_16, "weight": 4,
-                     "label": f"近 30 天上榜 {lhb_count} 次 · 识别游资 {len(matched)} 位",
-                     "reasons_pass": [f"{'/'.join(matched[:3])} 席位出现"] if matched else []}
-
-    # 17 · 舆情
+    # 17 · 舆情 / sentiment
     hot = _get("17_sentiment")
     hot_rank = (hot.get("hot_rank") or {}).get("rank_history") or []
     score_17 = 6 + min(2, len(hot_rank) // 10)
     out["17_sentiment"] = {"score": score_17, "weight": 3,
-                            "label": f"雪球热度上榜 {len(hot_rank)} 次"}
-
-    # 18 · 杀猪盘 (stub → safe by default, 9 分)
-    out["18_trap"] = {"score": 9, "weight": 5, "label": "🟢 未发现推广痕迹"}
-
-    # 19 · 实盘赛
-    contests = _get("19_contests")
-    summary = contests.get("summary") or {}
-    xq_total = summary.get("xueqiu_cubes_total", 0)
-    hi = summary.get("high_return_cubes", 0)
-    score_19 = 5 + min(3, xq_total // 5) + min(2, hi)
-    score_19 = min(10, score_19)
-    out["19_contests"] = {"score": score_19, "weight": 4,
-                           "label": f"雪球 {xq_total} 个组合持有 · {hi} 个收益 >50%",
-                           "reasons_pass": [f"{xq_total} 个雪球组合持有"] if xq_total else []}
+                            "label": f"social-sentiment mentions {len(hot_rank)}"}
 
     # Overall fundamental score
     total_weighted = sum(v["score"] * v["weight"] for v in out.values())
@@ -1275,10 +1221,9 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
         },
         "risks": risks,
         "buy_zones": narrative_override.get("buy_zones") or {
-            "value": {"price": round(price * 0.85, 2) if price else "—", "rationale": "历史 PE 25 分位"},
-            "growth": {"price": round(price * 0.92, 2) if price else "—", "rationale": "PEG 合理区"},
-            "technical": {"price": round(price * 0.95, 2) if price else "—", "rationale": "MA60 支撑位"},
-            "youzi": {"price": price or "—", "rationale": "当前情绪未破"},
+            "value": {"price": round(price * 0.85, 2) if price else "—", "rationale": "25th-percentile historical P/E"},
+            "growth": {"price": round(price * 0.92, 2) if price else "—", "rationale": "reasonable PEG band"},
+            "technical": {"price": round(price * 0.95, 2) if price else "—", "rationale": "MA60 support"},
         },
         "friendly": {
             "scenarios": scenarios,
