@@ -209,59 +209,6 @@ def score_dimensions(raw: dict) -> dict:
 
 # ─────────── PANEL GENERATION (rule-based) ───────────
 
-GROUP_VERDICTS = {
-    "bullish":  ["强烈买入", "买入", "关注"],
-    "bearish":  ["观望", "回避", "等待"],
-    "neutral":  ["观望", "不适合", "不达标"],
-}
-
-COMMENT_TEMPLATES = {
-    "A": {
-        "bullish": [
-            "ROE 和现金流都看得过去，长期持有没问题。",
-            "商业模式清晰，10 年后还能赚钱的那种。",
-            "安全边际尚可，不急着全仓。",
-        ],
-        "bearish": [
-            "估值已透支未来几年的增长，等回调。",
-            "护城河在侵蚀，这种价格不该买。",
-            "现金流质量存疑，再观察两个季度。",
-        ],
-        "neutral": ["看不太懂，先放观察池。", "不在能力圈内。"],
-    },
-    "B": {
-        "bullish": ["PEG 合理且成长性可见，可以进攻。", "CANSLIM 多数条件达标。"],
-        "bearish": ["估值已脱离 PEG 合理区间。", "机构持股过高，不符合 CANSLIM S 项。"],
-        "neutral": ["增长故事需要更多验证。"],
-    },
-    "C": {
-        "bullish": ["宏观环境对这只票的反身性有利。", "流动性拐点已到，可以下注。"],
-        "bearish": ["反身性正反馈进入晚期，小心。"],
-        "neutral": ["宏观判断暂时不明。"],
-    },
-    "D": {
-        "bullish": ["Stage 2 + 量能配合，技术面允许进场。", "VCP 形态已成，止损位清晰。"],
-        "bearish": ["距 52 周高点太近，不是入场点。"],
-        "neutral": ["等待明确突破。"],
-    },
-    "E": {
-        "bullish": ["生意对、人对、价格还凑合。", "ROE 持续性强，可以重仓。"],
-        "bearish": ["价格对不起生意质量。"],
-        "neutral": ["看不懂就不要碰。"],
-    },
-    "F": {
-        "bullish": ["板块有格局，趋势向上可以跟。", "二板定龙头，题材在线。", "情绪合力在，短线机会。"],
-        "bearish": ["市值不在我的射程里。", "题材已过热，这不是我的菜。"],
-        "neutral": ["不在风格里，不适合。"],
-    },
-    "G": {
-        "bullish": ["多因子评分 top 20%，值得下注。", "凯利公式给出正仓位。"],
-        "bearish": ["统计上已进入均值回归区。"],
-        "neutral": ["因子中性，模型无信号。"],
-    },
-}
-
-
 def generate_panel(dims_scored: dict, raw: dict) -> dict:
     """Rule-engine-based panel — each investor's verdict cites specific
     criteria from investor_criteria.py that were hit or missed.
@@ -279,15 +226,15 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
 
     def _score_to_verdict(score: float, signal: str) -> str:
         if signal == "bullish" and score >= 80:
-            return "强烈买入"
+            return "Strong Buy"
         if signal == "bullish":
-            return "买入"
+            return "Buy"
         if signal == "bearish" and score <= 20:
-            return "回避"
+            return "Avoid"
         if signal == "bearish":
-            return "观望"
+            return "Hold"
         # neutral
-        return "关注" if score >= 50 else "观望"
+        return "Watch" if score >= 50 else "Hold"
 
     for inv in INVESTORS:
         inv_id = inv["id"]
@@ -299,12 +246,12 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
 
         # Handle "skip" — investor won't look at this market
         if sig == "skip":
-            verdict = "不适合"
+            verdict = "Not a fit"
             score = 0
             confidence = 0
-            skip_reason = verdict_obj.get("skip_reason", "不在能力圈")
-            headline = f"不适合 — {skip_reason}"
-            comment = f"不在能力圈范围内，不做评价。\n{headline}"
+            skip_reason = verdict_obj.get("skip_reason", "outside circle of competence")
+            headline = f"Not a fit — {skip_reason}"
+            comment = f"Outside my circle of competence — no opinion.\n{headline}"
             reasoning = verdict_obj.get("rationale", "")
         else:
             verdict = _score_to_verdict(score, sig)
@@ -325,8 +272,8 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
             comment = f"{persona_line}\n{headline}"
             reasoning = verdict_obj["rationale"]
 
-        v_key = {"强烈买入": "strongly_buy", "买入": "buy", "关注": "watch",
-                 "观望": "wait", "回避": "avoid", "不适合": "skip"}.get(verdict, "n_a")
+        v_key = {"Strong Buy": "strongly_buy", "Buy": "buy", "Watch": "watch",
+                 "Hold": "wait", "Avoid": "avoid", "Not a fit": "skip"}.get(verdict, "n_a")
         vote_dist[v_key] = vote_dist.get(v_key, 0) + 1
         sig_dist[sig] = sig_dist.get(sig, 0) + 1
 
@@ -410,12 +357,12 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
     }
 
     def _consensus_to_verdict(c: float) -> str:
-        """流派级 verdict · 阈值与综合分保持一致（80/65/50/35）."""
-        if c >= 80: return "重仓"
-        if c >= 65: return "买入"
-        if c >= 50: return "关注"
-        if c >= 35: return "谨慎"
-        return "回避"
+        """School-level verdict · thresholds match the composite score (80/65/50/35)."""
+        if c >= 80: return "Overweight"
+        if c >= 65: return "Buy"
+        if c >= 50: return "Watch"
+        if c >= 35: return "Cautious"
+        return "Avoid"
 
     by_group: dict[str, list[dict]] = {}
     for inv in investors_out:
@@ -458,7 +405,7 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
             "avg_score": round(s_score_mean, 1),  # alias · 兼容 v2.15.4 字段
             "vote_consensus": round(s_vote, 1),   # v2.15.5 · vote 分量（可视化展开用）
             "score_mean": round(s_score_mean, 1), # v2.15.5 · score 分量 · 明确语义
-            "verdict": _consensus_to_verdict(s_consensus) if n_active > 0 else "不适合",
+            "verdict": _consensus_to_verdict(s_consensus) if n_active > 0 else "Not a fit",
             "bullish": g_bull,
             "neutral": g_neu,
             "bearish": g_bear,

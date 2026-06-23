@@ -378,13 +378,13 @@ def main():
 
     print()
     print("━" * 50)
-    print(f"🎯 游资（UZI）Skills v{_get_version()} · 深度分析引擎")
-    print(f"   目标: {args.ticker}")
-    print(f"   环境: {'Codex' if env['is_codex'] else 'Docker' if env['is_docker'] else 'SSH' if env['is_ssh'] else '本地'}")
-    print(f"   浏览器: {'✓' if env['has_browser'] and not args.no_browser else '✗ (headless)'}")
-    print(f"   Cloudflare: {'✓ 已安装' if env['has_cloudflared'] else '✗ 未安装'}")
+    print(f"🎯 UZI Skills (US edition) v{_get_version()} · deep-analysis engine")
+    print(f"   Target: {args.ticker}")
+    print(f"   Environment: {'Codex' if env['is_codex'] else 'Docker' if env['is_docker'] else 'SSH' if env['is_ssh'] else 'local'}")
+    print(f"   Browser: {'✓' if env['has_browser'] and not args.no_browser else '✗ (headless)'}")
+    print(f"   Cloudflare: {'✓ installed' if env['has_cloudflared'] else '✗ not installed'}")
     if args.remote:
-        print(f"   远程模式: ✓ (完成后映射公网)")
+        print(f"   Remote mode: ✓ (public link after completion)")
     print("━" * 50)
     print()
 
