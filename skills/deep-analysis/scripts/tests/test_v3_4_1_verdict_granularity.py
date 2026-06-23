@@ -19,24 +19,24 @@ sys.path.insert(0, str(SCRIPTS))
 
 
 def test_verdict_label_has_fine_grained_buckets():
-    """v3.4.1 · score_fns 必须实现 7 档 verdict (而不是老 5 档)."""
+    """US edition · score_fns must implement the fine-grained English verdict buckets."""
     src = (SCRIPTS / "lib" / "pipeline" / "score_fns.py").read_text(encoding="utf-8")
-    for label in ("值得重仓", "可以蹲一蹲", "可以蹲（偏弱）",
-                  "观望偏多", "观望中性", "观望偏空", "谨慎", "回避"):
-        assert label in src, f"v3.4.1 verdict label '{label}' 缺"
+    for label in ("Strong Buy", "Worth Accumulating", "Worth Accumulating (weak)",
+                  "Watch (lean long)", "Watch (neutral)", "Watch (lean short)", "Cautious", "Avoid"):
+        assert label in src, f"verdict label '{label}' missing"
 
 
 def test_verdict_label_appends_school_split():
-    """流派多空数应追加到 verdict label."""
+    """The school bull/bear split should be appended to the verdict label."""
     src = (SCRIPTS / "lib" / "pipeline" / "score_fns.py").read_text(encoding="utf-8")
-    assert "派看多" in src, "verdict label 应追加 '派看多 / 派看空' 流派分歧标记"
+    assert "schools bullish" in src, "verdict label should append the school-divergence marker"
 
 
 def test_synthesis_includes_verdict_detail():
-    """v3.4.1 · synthesis 应输出 verdict_detail 字段."""
+    """synthesis must output a verdict_detail field."""
     src = (SCRIPTS / "lib" / "pipeline" / "score_fns.py").read_text(encoding="utf-8")
     assert "verdict_detail" in src
-    assert '基本面' in src and '共识' in src, "verdict_detail 必须含基本面+共识精确分"
+    assert 'Fundamentals' in src and 'Consensus' in src, "verdict_detail must carry the fundamentals + consensus scores"
 
 
 def test_assemble_report_renders_verdict_detail():

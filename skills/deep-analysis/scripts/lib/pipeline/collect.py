@@ -28,11 +28,11 @@ from .schema import DimResult, Quality
 
 
 # 依赖 0_basic.industry 的 dim · 必须在 wave 3
-DEPENDENT_DIMS = {"3_macro", "7_industry", "9_futures", "13_policy"}
+DEPENDENT_DIMS = {"3_macro", "7_industry"}
 
 # v3.0.0 · mini_racer V8 isolate 非 thread-safe · 这些 legacy fetcher 用 mini_racer
 # 必须串行跑 · 跟 legacy `_MINI_RACER_FETCHERS` 一致
-_MINI_RACER_LEGACY_MODULES = {"fetch_industry", "fetch_capital_flow", "fetch_valuation"}
+_MINI_RACER_LEGACY_MODULES = {"fetch_industry", "fetch_valuation"}
 _MINI_RACER_LOCK = threading.Lock()
 
 

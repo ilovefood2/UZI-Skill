@@ -34,15 +34,13 @@ _INVESTOR_NAME_MAP: dict[str, str] = {inv["id"]: inv.get("name", "") for inv in 
 
 # v3.5.0 · 流派标签 · 用户用 --school 锁定单一视角时 · skip 其他派
 SCHOOL_LABELS: dict[str, str] = {
-    "A": "价值派",
-    "B": "成长派",
-    "C": "宏观派",
-    "D": "技术派",
-    "E": "中国价投",
-    "F": "A 股游资",
-    "G": "量化",
-    "H": "科技领袖派",
-    "I": "AI 卡位/瓶颈猎手",
+    "A": "Value",
+    "B": "Growth",
+    "C": "Macro",
+    "D": "Technical",
+    "G": "Quant",
+    "H": "Tech Leaders",
+    "I": "AI Bottleneck Hunter",
 }
 
 
@@ -143,14 +141,14 @@ def evaluate(investor_id: str, features: dict) -> dict:
         Layer 3 · Composite: merge rule score with reality adjustments
     """
     # v3.5.0 · 用户锁定单一流派视角 (--school A/B/C/D/E/F/G) · 其他派直接 skip
-    # 注意：未分组（group=""）的评委也 skip · 锁定就是锁定 · 不漏网
+    # Note: ungrouped jurors (group="") also skip — a lock is a lock.
     locked = get_locked_school()
     if locked:
         inv_group = _INVESTOR_GROUP_MAP.get(investor_id, "")
         if inv_group != locked:
             return _skip_result(
                 investor_id,
-                f"用户锁定 {SCHOOL_LABELS.get(locked, locked)} 派视角 · 非该派评委不参与",
+                f"User locked to school {locked} ({SCHOOL_LABELS.get(locked, locked)}) — jurors outside this school do not participate",
             )
 
     # ─── Layer 1: Reality Check ───
@@ -278,18 +276,18 @@ def _build_headline(signal: str, pass_list: list, fail_list: list) -> str:
     """One-sentence takeaway citing the top rule."""
     if signal == "bullish" and pass_list:
         top = pass_list[0]
-        return f"看多核心：{top['msg']}"
+        return f"Bull case: {top['msg']}"
     if signal == "bearish" and fail_list:
         top = fail_list[0]
-        return f"看空核心：{top['msg']}"
+        return f"Bear case: {top['msg']}"
     # neutral — cite most important passed + most important failed
     if pass_list and fail_list:
-        return f"观望：{pass_list[0]['msg']}；但 {fail_list[0]['msg']}"
+        return f"Watch: {pass_list[0]['msg']}; but {fail_list[0]['msg']}"
     if pass_list:
-        return f"中性：{pass_list[0]['msg']}"
+        return f"Neutral: {pass_list[0]['msg']}"
     if fail_list:
-        return f"中性：{fail_list[0]['msg']}"
-    return "数据不足，暂无判断"
+        return f"Neutral: {fail_list[0]['msg']}"
+    return "Insufficient data, no call"
 
 
 def _build_rationale(signal: str, pass_list: list, fail_list: list) -> str:
@@ -297,16 +295,16 @@ def _build_rationale(signal: str, pass_list: list, fail_list: list) -> str:
     lines: list[str] = []
 
     if pass_list:
-        lines.append("✅ 符合标准：")
+        lines.append("✅ Criteria met:")
         for r in pass_list[:4]:
-            lines.append(f"  • [权{r['weight']}] {r['msg']}")
+            lines.append(f"  • [w{r['weight']}] {r['msg']}")
 
     if fail_list:
-        lines.append("❌ 未达标准：")
+        lines.append("❌ Criteria missed:")
         for r in fail_list[:4]:
-            lines.append(f"  • [权{r['weight']}] {r['msg']}")
+            lines.append(f"  • [w{r['weight']}] {r['msg']}")
 
-    return "\n".join(lines) if lines else "无有效规则命中"
+    return "\n".join(lines) if lines else "no rules matched"
 
 
 def _skip_result(investor_id: str, reason: str) -> dict:

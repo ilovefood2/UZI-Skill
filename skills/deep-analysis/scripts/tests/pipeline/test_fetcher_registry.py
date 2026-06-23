@@ -8,13 +8,12 @@ SCRIPTS = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(SCRIPTS))
 
 
-def test_registry_has_21_unique_dim_keys():
-    """22 legacy fetcher · 但 fetch_fund_holders + fetch_research 共享 '6_' 前缀（fund_holders/research）· 注册表用 6_fund_holders / 6_research 区分."""
+def test_registry_has_unique_dim_keys():
+    """US edition: 15 fetchers after removing the 6 China-only dims."""
     from lib.pipeline.fetchers import list_fetchers
     keys = list_fetchers()
-    # 6_fund_holders 和 6_research 算两个 · 总计 21 个 unique key（合并到注册表）
-    # 实际 22 fetcher 里 fetch_similar_stocks 是 bonus 不算主 22
-    assert len(keys) >= 20, f"至少 20 个 fetcher · 实际 {len(keys)}"
+    assert len(keys) == 15, f"expected 15 fetchers, got {len(keys)}"
+    assert len(keys) == len(set(keys)), "dim keys must be unique"
 
 
 def test_registry_all_adapters_loadable():
@@ -72,16 +71,14 @@ def test_fund_holders_adapter_extracts_top_level(monkeypatch):
     assert r.data.get("total_funds_holding") == 993
 
 
-def test_list_fetchers_covers_main_22():
-    """主要 22 fetcher 都在注册表里（至少下列核心 dim）."""
+def test_list_fetchers_covers_main_dims():
+    """All kept core dims are in the registry (US edition: 15 dims)."""
     from lib.pipeline.fetchers import list_fetchers
     keys = set(list_fetchers())
     must_have = {
         "0_basic", "1_financials", "2_kline", "3_macro", "4_peers",
         "5_chain", "6_fund_holders", "6_research", "7_industry", "8_materials",
-        "9_futures", "10_valuation", "11_governance", "12_capital_flow",
-        "13_policy", "14_moat", "15_events", "16_lhb", "17_sentiment",
-        "18_trap", "19_contests",
+        "10_valuation", "11_governance", "14_moat", "15_events", "17_sentiment",
     }
     missing = must_have - keys
-    assert not missing, f"注册表缺：{missing}"
+    assert not missing, f"registry missing: {missing}"

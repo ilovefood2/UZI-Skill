@@ -34,25 +34,25 @@ ALL_STYLES = (WHITE_HORSE, GROWTH_TECH, CYCLE, SMALL_SPECULATIVE,
               DIVIDEND_DEFENSE, DISTRESSED, QUANT_FACTOR, BALANCED)
 
 STYLE_LABELS = {
-    WHITE_HORSE:       "白马价值",
-    GROWTH_TECH:       "高成长科技",
-    CYCLE:             "周期股",
-    SMALL_SPECULATIVE: "小盘投机",
-    DIVIDEND_DEFENSE:  "分红防御",
-    DISTRESSED:        "困境反转",
-    QUANT_FACTOR:      "量化因子型",
-    BALANCED:          "中性兜底",
+    WHITE_HORSE:       "Blue-chip value",
+    GROWTH_TECH:       "High-growth tech",
+    CYCLE:             "Cyclical",
+    SMALL_SPECULATIVE: "Small-cap speculative",
+    DIVIDEND_DEFENSE:  "Dividend / defensive",
+    DISTRESSED:        "Distressed / turnaround",
+    QUANT_FACTOR:      "Quant factor",
+    BALANCED:          "Balanced (no clear tilt)",
 }
 
 STYLE_EXPLANATIONS = {
-    WHITE_HORSE:       "大盘 + 高 ROE + 低 PE · 价值派 (A 组+E 组) 加权 ×1.5、游资降权 ×0.3",
-    GROWTH_TECH:       "高成长 + 科技/医药/新能源 · 成长派 (B 组) 加权 ×1.5、技术派 ×1.2",
-    CYCLE:             "周期行业 · 宏观派 (C 组) 加权 ×1.5、原料/期货维度加权 ×1.5",
-    SMALL_SPECULATIVE: "A 股小盘 · 游资 (F 组) 加权 ×1.5、龙虎榜/舆情维度加权 ×1.5",
-    DIVIDEND_DEFENSE:  "高股息 + 银行/电力 · 价值派加权、财务/治理维度加权 ×1.3",
-    DISTRESSED:        "PB<1 + ROE 低 · 卡拉曼/邓普顿加权 ×1.5、估值/财务维度加权",
-    QUANT_FACTOR:      "多家量化基金重仓 · 量化派 (G 组) 加权 ×1.5、资金流维度加权",
-    BALANCED:          "无明显风格倾向 · 全派系等权",
+    WHITE_HORSE:       "Large-cap + high ROE + low P/E · Value schools (A) weighted ×1.5",
+    GROWTH_TECH:       "High growth + tech/healthcare/clean-energy · Growth school (B) ×1.5, Technical ×1.2",
+    CYCLE:             "Cyclical industry · Macro school (C) ×1.5, materials dimension ×1.5",
+    SMALL_SPECULATIVE: "Small-cap · Technical/momentum weighted, sentiment dimension ×1.5",
+    DIVIDEND_DEFENSE:  "High dividend + banks/utilities · Value weighted, financials/governance ×1.3",
+    DISTRESSED:        "P/B<1 + low ROE · Klarman/Templeton ×1.5, valuation/financials weighted",
+    QUANT_FACTOR:      "Heavily held by quant funds · Quant school (G) ×1.5",
+    BALANCED:          "No clear style tilt · all schools equal-weighted",
 }
 
 

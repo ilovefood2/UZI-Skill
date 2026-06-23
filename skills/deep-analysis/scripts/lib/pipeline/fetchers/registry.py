@@ -166,16 +166,6 @@ FETCHER_REGISTRY: dict[str, type] = {
         args_fn=lambda t, r: (t,),
     ),
 
-    # 9_futures · 期货
-    "9_futures": _make_adapter(
-        dim_key="9_futures",
-        legacy_module="fetch_futures",
-        required=[],
-        optional=["linked_contract", "price_trend", "inventory"],
-        args_fn=lambda t, r: (r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",),
-        depends_on=["0_basic"],
-    ),
-
     # 10_valuation · 估值
     "10_valuation": _make_adapter(
         dim_key="10_valuation",
@@ -192,25 +182,6 @@ FETCHER_REGISTRY: dict[str, type] = {
         required=[],
         optional=["pledge", "insider_trades_1y", "chairman_turnover"],
         args_fn=lambda t, r: (t,),
-    ),
-
-    # 12_capital_flow · 主力资金
-    "12_capital_flow": _make_adapter(
-        dim_key="12_capital_flow",
-        legacy_module="fetch_capital_flow",
-        required=[],
-        optional=["northbound", "margin_recent", "holder_count_history", "main_fund_flow_20d", "institutional_history"],
-        args_fn=lambda t, r: (t,),
-    ),
-
-    # 13_policy · 政策（按 industry 查）
-    "13_policy": _make_adapter(
-        dim_key="13_policy",
-        legacy_module="fetch_policy",
-        required=[],
-        optional=["policy_dir", "subsidy", "monitoring", "anti_trust", "snippets"],
-        args_fn=lambda t, r: (r.get("0_basic", {}).get("data", {}).get("industry", "") or "综合",),
-        depends_on=["0_basic"],
     ),
 
     # 14_moat · 护城河
@@ -231,39 +202,12 @@ FETCHER_REGISTRY: dict[str, type] = {
         args_fn=lambda t, r: (t,),
     ),
 
-    # 16_lhb · 龙虎榜
-    "16_lhb": _make_adapter(
-        dim_key="16_lhb",
-        legacy_module="fetch_lhb",
-        required=[],
-        optional=["lhb_count_30d", "lhb_records", "matched_youzi", "inst_vs_youzi"],
-        args_fn=lambda t, r: (t,),
-    ),
-
     # 17_sentiment · 舆情
     "17_sentiment": _make_adapter(
         dim_key="17_sentiment",
         legacy_module="fetch_sentiment",
         required=[],
         optional=["xueqiu_heat", "thermometer_value", "positive_pct", "sentiment_label", "platform_snippets", "hot_trend_mentions"],
-        args_fn=lambda t, r: (t,),
-    ),
-
-    # 18_trap · 杀猪盘排查
-    "18_trap": _make_adapter(
-        dim_key="18_trap",
-        legacy_module="fetch_trap_signals",
-        required=[],
-        optional=["risk_score", "pump_dump_signals", "warning_flags", "trap_likelihood"],
-        args_fn=lambda t, r: (t,),
-    ),
-
-    # 19_contests · 实盘大赛 / 大V 组合
-    "19_contests": _make_adapter(
-        dim_key="19_contests",
-        legacy_module="fetch_contests",
-        required=[],
-        optional=["xueqiu_cubes", "tgb_mentions", "ths_simu", "dpswang", "summary"],
         args_fn=lambda t, r: (t,),
     ),
 }

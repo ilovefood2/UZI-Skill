@@ -27,7 +27,12 @@ import os
 from pathlib import Path
 from typing import Any
 
-from lib.market_router import parse_ticker, is_chinese_name
+from lib.market_router import (
+    parse_ticker,
+    is_chinese_name,
+    ensure_us_supported,
+    UnsupportedMarketError,
+)
 
 
 def prepare_target(ticker: str, *, detect_lite_fn=None) -> dict[str, Any]:
@@ -39,8 +44,31 @@ def prepare_target(ticker: str, *, detect_lite_fn=None) -> dict[str, Any]:
 
     Returns:
       成功: {"ok": True, "ticker_info": TickerInfo}
-      早退: {"ok": False, "early_exit": "name_not_resolved"/"non_stock_security", "payload": dict}
+      早退: {"ok": False, "early_exit": "unsupported_market"/"name_not_resolved"/"non_stock_security", "payload": dict}
     """
+    # US-only edition: reject A-share / HK / Chinese-name input up front so we
+    # never spin up network preflight or fetchers for a market we no longer serve.
+    try:
+        ensure_us_supported(ticker)
+    except UnsupportedMarketError as e:
+        safe_dir = Path(".cache") / ticker
+        try:
+            safe_dir.mkdir(parents=True, exist_ok=True)
+            err_payload = {
+                "status": "unsupported_market",
+                "user_input": ticker,
+                "message": str(e),
+            }
+            (safe_dir / "_resolve_error.json").write_text(
+                json.dumps(err_payload, ensure_ascii=False, indent=2, default=str),
+                encoding="utf-8",
+            )
+        except Exception:
+            err_payload = {"status": "unsupported_market", "user_input": ticker, "message": str(e)}
+        print(f"\n🔴 Unsupported market: {ticker!r}")
+        print(f"   {e}")
+        return {"ok": False, "early_exit": "unsupported_market", "payload": err_payload}
+
     # v2.10.2 · 全局 requests timeout 兜底（akshare 内部调用不会卡死）
     try:
         from lib import net_timeout_guard  # noqa: F401（import 副作用装 monkey-patch）

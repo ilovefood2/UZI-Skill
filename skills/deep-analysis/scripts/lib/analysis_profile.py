@@ -112,23 +112,21 @@ class AnalysisProfile:
 # - 19_contests（雪球实盘组合排行榜 · 匿名 public 页）
 _PLAYWRIGHT_MEDIUM_DIMS = frozenset({
     "4_peers", "8_materials", "15_events", "17_sentiment",
-    "7_industry", "14_moat",  # v2.13.1 · medium 也覆盖这两（日常用得上）
+    "7_industry", "14_moat",
 })
-# deep default · medium 6 维 + 4 维补齐全 10
+# deep default · medium dims + macro
 _PLAYWRIGHT_DEEP_DIMS = _PLAYWRIGHT_MEDIUM_DIMS | frozenset({
-    "3_macro",                       # stats.gov.cn
-    "13_policy", "18_trap", "19_contests",  # v2.13.1 deep-only
+    "3_macro",
 })
 
 _CORE_FETCHERS = frozenset({
     "0_basic", "1_financials", "2_kline",
-    "10_valuation", "11_governance", "15_events", "16_lhb",
+    "10_valuation", "11_governance", "15_events",
 })
 _ALL_FETCHERS = frozenset({
     "0_basic", "1_financials", "2_kline", "3_macro", "4_peers", "5_chain",
-    "6_research", "7_industry", "8_materials", "9_futures", "10_valuation",
-    "11_governance", "12_capital_flow", "13_policy", "14_moat", "15_events",
-    "16_lhb", "17_sentiment", "18_trap", "19_contests",
+    "6_research", "7_industry", "8_materials", "10_valuation",
+    "11_governance", "14_moat", "15_events", "17_sentiment",
 })
 
 _PROFILES: dict[str, AnalysisProfile] = {

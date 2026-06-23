@@ -1,12 +1,13 @@
-"""Per-investor signature phrases for the evaluation panel.
+"""Per-investor signature phrases for the evaluation panel (US edition).
 
 Each investor has 3 signal types (bullish/bearish/neutral) and each maps to
 2-4 signature lines drawn from their REAL public quotes or methodology.
 These are used by run_real_test.py::generate_panel() to produce comments
 that actually sound like the person being simulated, not a generic group template.
 
-Keys follow the `id` field in lib/investor_db.py.
-Quotes sourced from `skills/investor-panel/references/quotes-knowledge-base.md`.
+Keys follow the `id` field in lib/investor_db.py. US edition: the China-value (E)
+and A-share youzi (F) schools have been removed; only the 35 Western / global
+investors remain.
 """
 from __future__ import annotations
 
@@ -15,757 +16,436 @@ from __future__ import annotations
 #   {roe}, {pe}, {price}, {name}, {industry}, {growth}, {stage}
 
 PERSONAS: dict[str, dict[str, list[str]]] = {
-    # ═══════════════ Group A · 经典价值 ═══════════════
+    # ═══════════════ Group A · Classic Value ═══════════════
     "buffett": {
         "bullish": [
-            "在我们能力圈里的生意，ROE {roe}% 长期稳得住，就值得持有十年。",
-            "价格是你付出的，价值是你得到的。这种生意我愿意拿十年。",
-            "如果你不愿意持有十年，就不要持有十分钟。这只票我觉得 OK。",
+            "Inside our circle of competence, a {roe}% ROE that holds up for years is worth owning for ten.",
+            "Price is what you pay, value is what you get. This is a business I'd hold for a decade.",
+            "If you wouldn't own it for ten years, don't own it for ten minutes — and this one I'd own.",
         ],
         "bearish": [
-            "ROE 和现金流都有疑问，这不是我们喜欢的生意。",
-            "PE {pe} 已经没有安全边际了，等别人恐惧时再看。",
-            "我们不碰看不懂的东西，这家的商业模式我没想清楚。",
+            "The ROE and the cash flow both raise questions; this isn't the kind of business we like.",
+            "At a P/E of {pe} there's no margin of safety left — I'll wait for others to be fearful.",
+            "We don't touch what we can't understand, and I haven't figured out this business model.",
         ],
         "neutral": [
-            "需要再观察几个季度，好公司也得等好价格。",
-            "在能力圈边缘，先观察不行动。",
+            "I'd want a few more quarters; even a great company needs a fair price.",
+            "On the edge of the circle of competence — watch, don't act.",
         ],
     },
     "graham": {
         "bullish": [
-            "PE {pe}、PB 合理，流动比率达标，符合防御型投资者标准。",
-            "7 项硬指标有多数达标，是一只能让我安稳睡觉的票。",
-            "长期分红 + 盈利稳定 + 估值不贵，经典价值三要素齐全。",
+            "P/E {pe} and P/B are reasonable, the current ratio passes — it fits the defensive-investor test.",
+            "Most of the hard criteria are met; this is a stock that lets me sleep at night.",
+            "Long dividend record, stable earnings, undemanding valuation — the three classic value pillars.",
         ],
         "bearish": [
-            "PE × PB 已远超 22.5，不符合最基本的安全边际。",
-            "连续 10 年盈利我没看到，防御型组合不应该碰。",
-            "市场短期是投票机，但这票投票机都嫌贵了。",
+            "P/E × P/B is well past 22.5 — it fails the most basic margin-of-safety test.",
+            "I don't see ten straight years of earnings; a defensive portfolio shouldn't touch it.",
+            "Short-term the market is a voting machine, and even the voting machine finds this expensive.",
         ],
-        "neutral": ["数据不齐，严守不达标不买入的纪律。"],
+        "neutral": ["The data is incomplete — I hold the discipline of not buying what doesn't qualify."],
     },
     "fisher": {
         "bullish": [
-            "{industry} 有足够市场潜力，管理层也在投研发，这是好苗子。",
-            "利润率能维持，劳资关系稳定，15 要点多数达标。",
-            "scuttlebutt 法调研，这家在产业链口碑不错。",
+            "{industry} has real market potential and management is investing in R&D — a promising seedling.",
+            "Margins hold, labor relations are stable; most of the 15 points are met.",
+            "Scuttlebutt checks out — this name has a good reputation up and down its supply chain.",
         ],
         "bearish": [
-            "管理层对投资者的坦诚度让我怀疑，暂时观望。",
-            "研发投入不足以支撑长期竞争力。",
+            "Management's candor with investors makes me doubt it; I'll wait.",
+            "R&D spend isn't enough to support a durable competitive edge.",
         ],
-        "neutral": ["要做更多闲聊式调研，现在信息还不够。"],
+        "neutral": ["I need more scuttlebutt; there isn't enough information yet."],
     },
     "munger": {
         "bullish": [
-            "反过来想：这个生意难被颠覆，管理层也没撒谎，那就可以买。",
-            "简单数学算得清，ROE {roe}% 的生意复利起来就是钱。",
-            "等待是投资者的伟大优点，但这票已经等够了。",
+            "Invert: this business is hard to disrupt and management isn't lying — so it's buyable.",
+            "Simple arithmetic — a {roe}% ROE business compounding is just money.",
+            "Patience is the investor's great virtue, but this one I've waited on long enough.",
         ],
         "bearish": [
-            "反过来想——这家最可能怎么死？我想到的方式有点多。",
-            "心理学偏误在作祟，大家都追这票就要警惕。",
-            "如果我知道我会死在哪里，我就永远不去那里。这票风险点我看得见。",
+            "Invert — how is this business most likely to die? I can think of a few too many ways.",
+            "Psychological bias is at work; when everyone is chasing it, be wary.",
+            "If I knew where I'd die I'd never go there — and I can see this one's risk points.",
         ],
-        "neutral": ["宁可错过，不可做错。"],
+        "neutral": ["Better to miss it than to get it wrong."],
     },
     "templeton": {
         "bullish": [
-            "PE 在历史低位区，这就是最大悲观点买入的时机。",
-            "市场还在怀疑这家，牛市生于悲观，长于怀疑。",
-            "和全球同类比这 PE 已经便宜，值得下手。",
+            "P/E is in its historical low zone — this is the point of maximum pessimism to buy.",
+            "The market still doubts this name; bull markets are born on pessimism and grow on skepticism.",
+            "Against global peers this P/E is already cheap — worth stepping in.",
         ],
         "bearish": [
-            "大众已经开始亢奋，邓普顿的铁律是此时卖出。",
-            "全球同类公司估值都更便宜，为什么买这个？",
+            "The crowd is getting euphoric, and Templeton's iron rule is to sell into that.",
+            "Comparable companies worldwide are cheaper — why buy this one?",
         ],
-        "neutral": ["情绪还没到极度悲观，等更好价格。"],
+        "neutral": ["Sentiment hasn't reached extreme pessimism yet; I'll wait for a better price."],
     },
     "klarman": {
         "bullish": [
-            "内在价值折扣 > 30%，安全边际的基石在这里。",
-            "下行风险可控，催化剂也可见，Baupost 会考虑。",
-            "情绪是仆人不是主人，现在情绪帮我便宜买入。",
+            "Discount to intrinsic value > 30% — that's the bedrock of the margin of safety.",
+            "Downside is contained and the catalyst is visible; Baupost would consider it.",
+            "Sentiment is a servant, not a master — right now it's helping me buy cheap.",
         ],
         "bearish": [
-            "没看到明确催化剂，安全边际也不够。",
-            "最坏情况下这票能亏 50%，风险回报比不对。",
+            "I don't see a clear catalyst, and the margin of safety isn't enough.",
+            "In the worst case this loses 50%; the risk/reward isn't right.",
         ],
-        "neutral": ["耐心等更明确的机会。"],
+        "neutral": ["I'll wait patiently for a more clear-cut opportunity."],
     },
 
-    # ═══════════════ Group B · 成长投资 ═══════════════
+    # ═══════════════ Group B · Growth ═══════════════
     "lynch": {
         "bullish": [
-            "PEG 合理，成长故事一句话说得清，散户能懂——这是 Fast Grower。",
-            "机构持股还不高，内部人在买，林奇喜欢这种票。",
-            "买你了解的公司。我对 {industry} 懂一点，这家可以蹲。",
+            "PEG is reasonable and the growth story fits on an index card — a classic Fast Grower.",
+            "Institutional ownership is still low and insiders are buying; Lynch likes this kind of stock.",
+            "Buy what you know. I understand {industry} a little, and I can stalk this one.",
         ],
         "bearish": [
-            "PEG 已经超过 2，成长故事不便宜。",
-            "机构都进来了，再涨空间不大。",
+            "PEG is already above 2 — the growth story isn't cheap.",
+            "The institutions are all in; there's not much room left to run.",
         ],
-        "neutral": ["公司业务我没研究透，先放 watchlist。"],
+        "neutral": ["I haven't fully studied the business — onto the watchlist for now."],
     },
     "oneill": {
         "bullish": [
-            "CANSLIM 多数达标：季度 EPS 超 25%、新高价、机构在加仓。",
-            "M 大盘向上 + L 行业前 3，CANSLIM 6 项以上，该进攻了。",
-            "最贵的股票通常是最便宜的——强者恒强。",
+            "Most of CANSLIM is met: quarterly EPS up 25%+, price near new highs, institutions accumulating.",
+            "M (market) up + L (a top-3 industry), six-plus CANSLIM boxes checked — time to go on offense.",
+            "The most expensive stocks are often the cheapest — the strong stay strong.",
         ],
         "bearish": [
-            "C 季度 EPS 没到 25%，CANSLIM 第一条就不过。",
-            "股价没创新高，趋势不对，我不买下跌股。",
+            "C — quarterly EPS isn't up 25%; it fails CANSLIM on the very first letter.",
+            "Price hasn't made new highs and the trend is wrong; I don't buy falling stocks.",
         ],
-        "neutral": ["N 项缺一不可，目前只达标 4 项。"],
+        "neutral": ["Every CANSLIM letter matters — only 4 of them check out right now."],
     },
     "thiel": {
         "bullish": [
-            "{industry} 里看起来有垄断特征，比第二名好 10 倍。",
-            "网络效应 + 规模经济都有，这是好生意的 DNA。",
-            "最伟大的公司都从一个秘密开始，这家的秘密我看得见。",
+            "{industry} shows monopoly characteristics — this looks 10x better than the #2.",
+            "Network effects plus economies of scale — that's the DNA of a great business.",
+            "Every great company starts from a secret, and I can see this one's secret.",
         ],
         "bearish": [
-            "竞争激烈意味着这是失败者的游戏。",
-            "没看到垄断基因，长期竞争优势可疑。",
+            "Fierce competition means this is a loser's game.",
+            "I don't see the monopoly gene; the durable advantage is doubtful.",
         ],
-        "neutral": ["还没到 0 → 1 的临界点。"],
+        "neutral": ["It hasn't reached the 0 → 1 inflection point yet."],
     },
     "wood": {
         "bullish": [
-            "{industry} 处于 S 曲线拐点，TAM 每年 >30% 增长——买它就是买未来！",
-            "We don't buy stocks, we buy the future. {name} 就是那个未来。",
-            "成本曲线快速下降中，5 年内会改变整个 {industry} 的游戏规则。",
-            "指数型增长刚起步，大多数人还看不懂——这正是我们加仓的时候。",
-            "AI / 量子 / 基因 / 机器人 / 能源存储，五大平台之一，必须重仓！",
+            "{industry} is at an S-curve inflection, TAM growing >30% a year — buying it is buying the future!",
+            "We don't buy stocks, we buy the future. {name} is that future.",
+            "The cost curve is falling fast; within 5 years it rewrites the rules of {industry}.",
+            "Exponential growth is just starting and most people can't see it — that's when we add.",
+            "AI / robotics / energy storage / genomics / blockchain — one of the five platforms, must overweight!",
         ],
         "bearish": [
-            "不在我们五大平台里（AI、机器人、储能、量子、多组学），不看。",
-            "颠覆性不够——只是传统行业的改良版，不是范式转移。",
-            "技术路线不确定，还没到成本曲线拐点，太早了。",
+            "It's not in our five platforms (AI, robotics, storage, blockchain, multiomics) — pass.",
+            "Not disruptive enough — an improved version of a legacy industry, not a paradigm shift.",
+            "The technology path is uncertain and it hasn't hit the cost-curve inflection — too early.",
         ],
-        "neutral": ["S 曲线还没到拐点，但值得持续跟踪——一旦成本下降 50% 我们就进场。"],
+        "neutral": ["The S-curve hasn't inflected yet, but worth tracking — once costs fall 50% we step in."],
     },
-
-    # ═══════════════ Group C · 宏观对冲 ═══════════════
-    "soros": {
-        "bullish": [
-            "预期与基本面出现正向偏离，反身性循环进入加速期。",
-            "市场主动塑造现实，现在买就是押正反馈开始。",
-            "我之所以富有是因为我知道我什么时候错——这次没错。",
-        ],
-        "bearish": [
-            "正反馈循环已近顶峰，反身性即将反转。",
-            "重要的不是判断对错，而是赚多亏少——现在赢面不够。",
-        ],
-        "neutral": ["反身性信号还不够强。"],
-    },
-    "dalio": {
-        "bullish": [
-            "长期债务周期在早期，信贷环境友好，这种资产会受益。",
-            "拥抱现实——数据指向买入。现金是垃圾，这票是资产。",
-            "痛苦加反思等于进步，基本面反转的逻辑到了。",
-        ],
-        "bearish": [
-            "债务周期晚期 + 信贷收紧，风险资产都要小心。",
-            "全天候配置里这种资产的权重该降。",
-        ],
-        "neutral": ["宏观信号混乱，观望。"],
-    },
-    "marks": {
-        "bullish": [
-            "市场温度计在恐惧区，卓越投资来自买得好不是买得好资产。",
-            "为风险买单我不做，但这次风险已经被定价了。",
-            "你不能预测但可以准备——现在是准备好的时机。",
-        ],
-        "bearish": [
-            "温度计 80+ 进入贪婪区，这种时候我选离场。",
-            "估值最终会回归均值，现在追高是交税。",
-        ],
-        "neutral": ["温度在中位，按兵不动。"],
-    },
-    "druck": {
-        "bullish": [
-            "宏观流动性拐点已到，这类标的最受益——值得集中下注。",
-            "永远投资 12-18 个月后的世界，这票符合那个时点的逻辑。",
-            "你做对时要下大注，现在就是时候。",
-        ],
-        "bearish": [
-            "流动性还在收紧，这种估值站不住。",
-            "我只投资 12-18 个月后的世界，现在这题材已经过气了。",
-        ],
-        "neutral": ["不是我的确定性标的，放弃。"],
-    },
-    "robertson": {
-        "bullish": [
-            "{industry} 里相对最强，Tiger 的做法是做多最强的。",
-            "基本面领先同行，长做多短做空组合里这是多头腿。",
-        ],
-        "bearish": [
-            "行业排名中下游，我可能做空它对冲多头。",
-            "这不是我会买的，我们是评估公司的高手不是赌大盘的。",
-        ],
-        "neutral": ["排名中位，不做。"],
-    },
-
-    # ═══════════════ Group D · 技术趋势 ═══════════════
-    "livermore": {
-        "bullish": [
-            "突破关键价位 + 量能配合，金字塔加仓条件满足。",
-            "钱不在买卖中赚，而在等待中赚——这次等到了。",
-            "市场永远是对的，对的是市场，买！",
-        ],
-        "bearish": [
-            "没突破关键位，量能也不对，不做。",
-            "永远不要逆趋势加仓。",
-        ],
-        "neutral": ["等突破信号。"],
-    },
-    "minervini": {
-        "bullish": [
-            "Stage 2 + VCP 收缩 + 200 日均线上升——SEPA 8 项达标我就买。",
-            "只买强势股，这只票符合 Trend Template 全部标准。",
-            "相对强度 >70，距高点 <25%，完美入场条件。",
-        ],
-        "bearish": [
-            "不在 Stage 2，我不碰。",
-            "Trend Template 只达标 4 项，不符合 SEPA 纪律。",
-            "止损不是建议是命令，这票位置不支持我进场。",
-        ],
-        "neutral": ["技术面还没到位。"],
-    },
-    "darvas": {
-        "bullish": [
-            "箱体上沿被放量突破，这是 Darvas Box 的典型买点。",
-            "回踩箱顶不破，强势确认。",
-        ],
-        "bearish": ["还在箱体震荡，没方向。"],
-        "neutral": ["箱顶未破不做。"],
-    },
-    "gann": {
-        "bullish": [
-            "距上一低点约 55 交易日（斐波那契窗口），角度线支持做多。",
-            "时间周期到位，价格运动遵循自然法则。",
-        ],
-        "bearish": ["时间窗口进入高风险区。"],
-        "neutral": ["时间价格未共振。"],
-    },
-
-    # ═══════════════ Group E · 中国价投 ═══════════════
-    "duan": {
-        "bullish": [
-            "生意对、人对、价格对——三问都过，就是我喜欢的。",
-            "看 10 年想得明白，商业模式也不复杂，可以拿。",
-            "做对的事情，把事情做对。这家两件都沾边。",
-        ],
-        "bearish": [
-            "看 10 年想不明白的公司我不买。这家我没看懂。",
-            "价格不对，宁可错过不要做错。",
-            "Stop doing list：这种高 PE 成长股不在我的清单里。",
-        ],
-        "neutral": [
-            "看不懂就不要碰，放 watchlist。",
-            "本分要紧，看不懂的机会不是我的。",
-        ],
-    },
-    "zhangkun": {
-        "bullish": [
-            "ROE 持续性强 + 品牌壁垒 + 消费属性——可以进集中持仓。",
-            "我们偏好有定价权的公司，这家看起来有。",
-            "短期股价无法预测，长期价值终将兑现。",
-        ],
-        "bearish": [
-            "消费属性不够，不是我们集中持仓的标的。",
-            "ROE 波动太大，缺乏持续性。",
-        ],
-        "neutral": ["需要再观察两个季度。"],
-    },
-    "zhushaoxing": {
-        "bullish": [
-            "长期成长确定性够高，适合用长期视角。",
-            "低换手适配度高，可以放进组合长期拿。",
-            "投资是一场长跑，这票能陪我跑。",
-        ],
-        "bearish": [
-            "成长确定性不够，长线资金不应重仓。",
-            "行业景气度下行，等更好时点。",
-        ],
-        "neutral": ["再观察，不急。"],
-    },
-    "xiezhiyu": {
-        "bullish": [
-            "GARP 性价比合适——成长和估值平衡得不错。",
-            "不追求单纯成长也不追便宜，这家刚好。",
-        ],
-        "bearish": [
-            "PE 相对 G 偏高，性价比不够。",
-            "成长质量一般，估值又不便宜，没想法。",
-        ],
-        "neutral": ["性价比在中位，不急着动。"],
-    },
-    "fengliu": {
-        "bullish": [
-            "赔率还不错，弱者体系下值得下注。",
-            "预期差存在，市场还没完全认知，时间是朋友。",
-            "强者失心时弱者捕捉机会——这次我是弱者。",
-        ],
-        "bearish": [
-            "在混沌时不敢果断给结论，先避开。",
-            "赔率不好，共识已经太一致。",
-        ],
-        "neutral": [
-            "我只能依靠时间、赔率与常识，现在时机不明。",
-            "寻找共识，依靠常识，等赔率更好。",
-        ],
-    },
-    "dengxiaofeng": {
-        "bullish": [
-            "产能周期位置不错 + 行业供需拐点到位。",
-            "好公司 + 好行业 + 好价格，三者都沾。",
-            "企业价值创造的根本力量在这里显现。",
-        ],
-        "bearish": [
-            "产能周期还在释放，供给压力未消化。",
-            "投资回报来自价值创造不是博弈，这家价值创造不够。",
-        ],
-        "neutral": ["周期位置不明。"],
-    },
-
-    # ═══════════════ Group F · 游资 ═══════════════
-    "zhang_mz": {
-        "bullish": [
-            "格局打开，目标看上一个台阶，大资金可以进场。",
-            "做趋势的人不要预测顶部——这票趋势在。",
-            "主流板块的龙头，资金易形成合力。",
-        ],
-        "bearish": [
-            "下降通道里赚钱是偶然的，亏钱是必然的。",
-            "不是主流板块，资金合力差，放弃。",
-        ],
-        "neutral": [
-            "不会空仓的人永远不会战斗，不会止损的人死路一条——这票我先等。",
-            "市值不够大，不在我的射程里。",
-        ],
-    },
-    "sun_ge": {
-        "bullish": [
-            "板块有引导属性，可以锁仓。",
-            "无招胜有招的前提是基本招式到位——这票到位了。",
-        ],
-        "bearish": ["板块节奏不对，放弃。"],
-        "neutral": ["不识溧阳路，龙头战法白忙碌——这票不是我的菜。"],
-    },
-    "zhao_lg": {
-        "bullish": [
-            "二板定龙头，题材在线，我进。",
-            "新题材就抛弃旧题材——这是新的，跟。",
-            "短期交易不讲价值不讲技术，只讲故事。这故事不错。",
-        ],
-        "bearish": [
-            "没有连板潜力，题材也不新，我不碰。",
-            "一板能看出来个毛，没确认龙头地位。",
-        ],
-        "neutral": [
-            "题材不够鲜，先观望。",
-            "不是板块最强辨识度的那个，我不做跟风。",
-        ],
-    },
-    "fs_wyj": {
-        "bullish": [
-            "小盘超跌 + 翘板机会，上车。",
-            "系统和纪律就是信仰，这票在系统里。",
-        ],
-        "bearish": [
-            "市值太大不在我射程，一日游不好翘。",
-            "执行模式简单第一，这票复杂我不碰。",
-        ],
-        "neutral": ["盘子不对，不适合。"],
-    },
-    "yangjia": {
-        "bullish": [
-            "情绪周期到位了，人气在这——牛股不是资金堆的，是情绪产物。",
-            "得散户心者得天下，这票人气开始聚集。",
-            "别人贪婪时我更贪婪。",
-        ],
-        "bearish": [
-            "情绪周期已到顶，高手买入龙头，超级高手卖出龙头。",
-            "情绪不到绝不重仓。",
-        ],
-        "neutral": [
-            "情绪周期不明，我永远等市场告诉我答案。",
-            "心中无顶底，操作自随心——这次随心选择等。",
-        ],
-    },
-    "chen_xq": {
-        "bullish": [
-            "龙头一线天，不上车就追不上了。",
-            "分歧是机会一致是风险——现在有分歧，入场。",
-            "反核按钮时刻，重仓加仓。",
-        ],
-        "bearish": [
-            "超短最重要的是跟随情绪和主线——这票主线不对。",
-            "亏出来的经验告诉我，这种位置不能追。",
-        ],
-        "neutral": ["等一线天的机会。"],
-    },
-    "hu_jl": {
-        "bullish": ["多席位协同可以做，板块在热点上。", "欢乐豆玩法，这票可以进。"],
-        "bearish": ["板块不热，不做。"],
-        "neutral": ["等多席位信号。"],
-    },
-    "fang_xx": {
-        "bullish": [
-            "大成交量 + 趋势向上，格局锁仓。",
-            "龙头股是我选股王冠上的明珠——这票有点像。",
-        ],
-        "bearish": [
-            "日均成交不够大，不在趋势票范围内。",
-            "不是我的菜。",
-        ],
-        "neutral": ["市值+成交量没到位。"],
-    },
-    "zuoshou": {
-        "bullish": [
-            "围着主线做，研究龙头研究涨停——这票合格。",
-            "刚入市不要想着赚钱要想着悟道，但这票让我悟到了。",
-        ],
-        "bearish": ["主线上没看到它。", "熊市比的不是快而是稳——这票不稳。"],
-        "neutral": ["稳定盈利前少投入资金多投入精力。"],
-    },
-    "xiao_ey": {
-        "bullish": [
-            "基本面 + 技术面共振，大盘主线也配合，可以重仓。",
-            "股票基本上就是个势，这票有势。",
-            "大盘、热点、个股、情绪、节奏、心态、舒适买点——七维达标。",
-        ],
-        "bearish": [
-            "基本面不够硬，我这一派的特点是看基本面。",
-            "对的路要坚持，错的路要停止——这票我走不下去。",
-        ],
-        "neutral": ["没到舒适买点。"],
-    },
-    "jiao_yy": {
-        "bullish": [
-            "做龙头要眼到手到心到——我到了。",
-            "真正龙头都有渡劫期，等的就是这个确定性。",
-        ],
-        "bearish": ["只看龙头少看杂毛，这票不是龙头。"],
-        "neutral": ["渡劫期未过，等。"],
-    },
-    "mao_lb": {
-        "bullish": [
-            "AI 主线大资金可以进，技术是三个月能学完的东西，决定存活的是觉悟。",
-            "大资金信号到位。",
-        ],
-        "bearish": ["不在 AI 主线上，我不碰。", "觉悟告诉我这票做不了大资金。"],
-        "neutral": ["AI 主线位置不明。"],
-    },
-    "xiao_xian": {
-        "bullish": [
-            "超预期就买买买。",
-            "越到行情后期越往龙头转移，这票是龙头。",
-        ],
-        "bearish": [
-            "低于预期就卖卖卖，这票指引一般。",
-            "做跟风杂毛会被市场淘汰。",
-        ],
-        "neutral": [
-            "慢就是快，重点是稳中求进。",
-            "大回撤都是满仓一只股导致的，先观察。",
-        ],
-    },
-    "lasa": {
-        "bullish": ["散户集合体：这票开始追涨了。"],
-        "bearish": ["散户接盘警告：我们出现一般是反向指标。"],
-        "neutral": ["持仓周期 1-3 天，短线打游击。"],
-    },
-    "chengdu": {
-        "bullish": ["盘中直线拉涨停，万手封单模式启动。"],
-        "bearish": ["不是底部黑马，不值得点火。"],
-        "neutral": ["等消息面发酵。"],
-    },
-    "sunan": {
-        "bullish": ["低价小盘联动合适做差价，日日吃涨停。"],
-        "bearish": ["市值过大，差价空间小。"],
-        "neutral": ["群体作业，先看其他席位动向。"],
-    },
-    "ningbo_st": {
-        "bullish": ["连板接力的典型信号。"],
-        "bearish": ["没有连板潜力。"],
-        "neutral": ["等连板确认。"],
-    },
-    "liuyi_zl": {
-        "bullish": ["题材到了干就完了——大资金接力老龙。"],
-        "bearish": ["不是我这一派的风格。"],
-        "neutral": ["题材还没到位。"],
-    },
-    "liu_sh": {
-        "bullish": ["低吸接力位置不错，打板手风格匹配。"],
-        "bearish": ["顶板/秒板条件不够。"],
-        "neutral": ["等低吸信号。"],
-    },
-    "gu_bl": {
-        "bullish": ["大格局敢锁仓，这票可以引爆板块。"],
-        "bearish": ["格局不够大，不是我的菜。"],
-        "neutral": ["板块未启动，先等。"],
-    },
-    "bj_cj": {
-        "bullish": [
-            "首板才是最干净的状态，这票符合我的战法。",
-            "9 点 25 涨幅榜有它，打首板。",
-            "市值 20-80 亿 + 题材股 + 机构没进，正好是我的菜。",
-        ],
-        "bearish": [
-            "机构持仓太高，故事不值钱了。",
-            "不是首板，后面打连板我只打上午十点半前的放量板。",
-        ],
-        "neutral": ["大盘不对我就空仓等待。"],
-    },
-    "wang_zr": {
-        "bullish": ["只操作强势的股票，这票强。", "熊市出英雄。"],
-        "bearish": ["交易不活跃，坚决回避。", "涨停次日不能追买——80% 会回落。"],
-        "neutral": ["专注地把该做的做好，这票我先放一放。"],
-    },
-    "xin_dd": {
-        "bullish": [
-            "困境反转 + 撬板模式，超预期就买买买。",
-            "主线就是热门，鑫多多去哪哪里热。",
-            "低位埋伏完毕，剩下就是吹票出货——不是，是价值发现😄",
-        ],
-        "bearish": [
-            "低于预期就卖卖卖，这票指引差。",
-            "不做高位接力，只做困境反转——这票不是困境。",
-        ],
-        "neutral": ["还没到埋伏位。"],
-    },
-
-    # ═══════════════ Group G · 量化 ═══════════════
-    "simons": {
-        "bullish": ["价格统计异常出现买入信号，模型说买就买。"],
-        "bearish": ["均值回归信号显示超买，减仓。"],
-        "neutral": ["模型无明确信号。"],
-    },
-    "thorp": {
-        "bullish": ["凯利公式给出正仓位，EV > 0 就下注。"],
-        "bearish": ["期望值为负，不碰。"],
-        "neutral": ["数学不撒谎——EV 接近零，不动。"],
-    },
-    "shaw": {
-        "bullish": ["多因子评分位于 top 20%，质量动量都强。"],
-        "bearish": ["多因子评分在底部 20%，全面卖出。"],
-        "neutral": ["因子分散，中性。"],
-    },
-
-    # ═══════════════ Group I · AI 卡位/瓶颈猎手 ═══════════════
-    # Serenity (@aleabitoreddit) — 语料源：references/serenity-voice.md
-    "serenity": {
-        "bullish": [
-            "{name} 卡在 {industry} 那个不可替代的节点上——No substrate, no device，这种东西就是一台印钞机，anon。重仓，Then go long。",
-            "我反向拆了整条 {industry} 供应链，{name} 是那个 60%+ 份额的双寡头瓶颈，市值还 grossly mispriced。市场还没 rotation 到这，我先埋。",
-            "别人盯着终端大票，我只买它们离不开的公司。{name} 就是 {industry} 的卡脖子海峡——不可替代、扩产慢、没人定价。满仓不解释。",
-            "这是 bottleneck of a bottleneck。{name} 卡死 {industry} 的命门，下游所有人都得求它供货。Then go long，PT 我敢往上画。",
-        ],
-        "bearish": [
-            "{name} 在 {industry} 里随便就能被替代，三家厂都能供——没有卡点，对我没任何意义。Pass。",
-            "盯着 {name} 的 EPS 没用，它根本不在 {industry} 的瓶颈上，只是条可被绕过的普通环节。不碰。",
-            "供给一点都不紧，{industry} 这块产能随时能放量，{name} 没有任何不可替代性。这种我从不长。",
-            "{name} 是终端的热门大票，不是卡脖子节点。挤在 consensus 里的拥挤交易，我反手观望甚至看空。",
-        ],
-        "neutral": [
-            "{name} 在 {industry} 可能是个潜在卡点，但还没硬验证。等客户 roadmap 和缺货信号，再决定要不要 go long。",
-            "{name} 的瓶颈逻辑成立一半——份额够集中，但扩产能不能跟上还没数据。等下一份财报电话会里的 backlog 和 ASP。",
-            "故事有了，定价还没错配到位。{name} 卡位待 confirm，等机构 rotation 信号——在那之前我先小仓 tracking。",
-        ],
-    },
-
-    # ═══ v3.8.1 · 13 位 v3.7.0 新晋评委台词（体检发现缺失 → 群聊只能用 generic fallback）═══
     "andreessen": {
         "bullish": [
-            "Software is eating {industry}，而 {name} 拿着餐刀。网络效应一旦锁定，这就是下一个十年的平台。It's time to build——and to buy。",
-            "{name} 是 founder mode 在 {industry} 的活样本：增长在 hyper 段，TAM 大到给得起十倍叙事。Techno-optimism, fully loaded。",
+            "Software is eating {industry}, and {name} is holding the knife. Once network effects lock in, this is the next decade's platform. It's time to build — and to buy.",
+            "{name} is founder-mode applied to {industry}: hyper-growth phase, a TAM big enough for a ten-bagger narrative. Techno-optimism, fully loaded.",
         ],
         "bearish": [
-            "{industry} 是原子世界的生意，不是比特的——没有软件杠杆、没有零边际成本，{name} 进不了我的 thesis。",
-            "{name} 没有网络效应、没有平台锁定，只是个 feature 不是 company。Pass。",
+            "{industry} is an atoms business, not bits — no software leverage, no zero marginal cost, so {name} can't enter my thesis.",
+            "{name} has no network effects and no platform lock-in — it's a feature, not a company. Pass.",
         ],
         "neutral": [
-            "{name} 摸到了软件化的边，但 founder 还没证明能把 {industry} 的 playbook 跑通。Watch list。",
+            "{name} touches the edge of software, but the founder hasn't proven they can run the {industry} playbook. Watch list.",
         ],
     },
     "gurley": {
         "bullish": [
-            "All revenue is not created equal——{name} 的毛利结构告诉我这是高质量收入，{industry} 的 magnitude of demand 是真的。",
-            "{name} 像极了早年的 marketplace 赢家：单位经济为正、复购在涨、烧钱倍数可控。这种生意我在 Benchmark 见过结局。",
+            "All revenue is not created equal — {name}'s margin structure tells me this is high-quality revenue and the magnitude of demand in {industry} is real.",
+            "{name} looks like the early marketplace winners: positive unit economics, rising repeat rate, controlled burn multiple. I've seen how this ends at Benchmark.",
         ],
         "bearish": [
-            "{name} 的 EV/Revenue 已经脱离地心引力。估值不是荣誉勋章，是负债——{industry} 风口越大，这种票摔得越疼。",
-            "单位经济跑不平——每单都亏钱靠规模翻盘的故事，{industry} 里十个死九个。",
+            "{name}'s EV/Revenue has left orbit. Valuation isn't a badge of honor, it's a liability — the bigger the {industry} hype, the harder these fall.",
+            "Unit economics don't pencil out — losing money per order and hoping scale fixes it; nine of ten die in {industry}.",
         ],
         "neutral": [
-            "{name} 的需求强度还行，但 take rate 和留存还没到我下注的置信度。再等两个季度的 cohort 数据。",
+            "{name}'s demand intensity is okay, but take rate and retention aren't at my confidence level yet. Two more quarters of cohort data.",
         ],
     },
     "naval": {
         "bullish": [
-            "{name} 有 permissionless leverage——代码和品牌在 {industry} 里替它打工。买入然后睡觉，复利自己会跑。",
-            "Specific knowledge 没法被培训出来，{name} 在 {industry} 的位置就是这种知识的变现。Play long-term games。",
+            "{name} has permissionless leverage — code and brand work for it in {industry}. Buy it and sleep; compounding runs itself.",
+            "Specific knowledge can't be trained, and {name}'s position in {industry} is that knowledge monetized. Play long-term games.",
         ],
         "bearish": [
-            "{name} 是用时间换钱的生意，没有杠杆、没有复利曲线。Seek wealth, not money——这票两个都给不了。",
-            "零和游戏里没有赢家，只有幸存者。{industry} 这种内卷场我不进。",
+            "{name} trades time for money — no leverage, no compounding curve. Seek wealth, not money; this gives neither.",
+            "There are no winners in zero-sum games, only survivors. I don't enter the grind that is {industry}.",
         ],
         "neutral": [
-            "{name} 的杠杆雏形有了，但还看不出十年后它是否还在。判断力比勤奋值钱——我先不动。",
+            "{name}'s leverage is embryonic, but I can't tell if it'll still be here in ten years. Judgment beats effort — I'll wait.",
         ],
     },
     "gerstner": {
         "bullish": [
-            "{name} 在 AI capex 超级周期的正确一侧：营收在加速而不是匀速，Rule of 40 轻松过线。Time to lean in。",
-            "我们在 Altimeter 给 {industry} 建了完整模型——{name} 是 category leader，贵但增长撑得起。Own the disruptors。",
+            "{name} is on the right side of the AI-capex supercycle: revenue accelerating, not just growing, Rule of 40 cleared with ease. Time to lean in.",
+            "We've built the full {industry} model at Altimeter — {name} is the category leader, expensive but the growth supports it. Own the disruptors.",
         ],
         "bearish": [
-            "{name} 增速在减档但估值还停在加速档，这种剪刀差是经典减仓信号。",
-            "{industry} 不在 AI 资本开支的受益链上，{name} 拿不到这一轮的 beta。",
+            "{name}'s growth is downshifting while the valuation is stuck in high gear — that scissor is a classic trim signal.",
+            "{industry} isn't on the AI-capex beneficiary chain; {name} won't capture this cycle's beta.",
         ],
         "neutral": [
-            "{name} 的 Rule of 40 在及格线附近晃，下季度 guidance 决定方向。Hold, don't add。",
+            "{name}'s Rule of 40 is wobbling near the pass line; next quarter's guidance decides direction. Hold, don't add.",
         ],
     },
     "chamath": {
         "bullish": [
-            "Let me tell you why this matters：{name} 的 TAM 是千亿级，而市场还在用线性思维给指数曲线定价。Generational opportunity。",
-            "{industry} 正在被重构，{name} 是拿着蓝图的玩家——盈利路径清晰、稀释可控。I'm in。",
+            "Let me tell you why this matters: {name}'s TAM is in the hundreds of billions, and the market is still pricing an exponential curve with linear thinking. Generational opportunity.",
+            "{industry} is being rebuilt and {name} holds the blueprint — clear path to profitability, controlled dilution. I'm in.",
         ],
         "bearish": [
-            "{name} 是个 story stock——营收撑不起叙事，全靠 PPT 和热度。我做过 SPAC，我认得这种味道。",
-            "披露质量这么差的公司，{industry} 再热我也不碰。Transparency or pass。",
+            "{name} is a story stock — revenue can't carry the narrative, it runs on slides and hype. I've done SPACs; I know this smell.",
+            "With disclosure quality this poor, I won't touch it no matter how hot {industry} is. Transparency or pass.",
         ],
         "neutral": [
-            "{name} 的 thesis 我买一半：赛道对，但执行还没证明。Small position, big patience。",
+            "I buy half of {name}'s thesis: the lane is right, but execution isn't proven. Small position, big patience.",
         ],
+    },
+
+    # ═══════════════ Group C · Macro / Hedge ═══════════════
+    "soros": {
+        "bullish": [
+            "Expectations and fundamentals have diverged positively; the reflexive loop is entering its accelerating phase.",
+            "The market actively shapes reality — buying now is betting the positive feedback has begun.",
+            "I'm rich because I know when I'm wrong — and this time I'm not.",
+        ],
+        "bearish": [
+            "The positive-feedback loop is near its peak; reflexivity is about to reverse.",
+            "It's not whether you're right or wrong, it's how much you make when right — the odds aren't enough now.",
+        ],
+        "neutral": ["The reflexivity signal isn't strong enough yet."],
+    },
+    "dalio": {
+        "bullish": [
+            "We're early in the long-term debt cycle, credit conditions are friendly — this asset benefits.",
+            "Embrace reality — the data points to buy. Cash is trash and this is an asset.",
+            "Pain plus reflection equals progress; the fundamental-turn logic has arrived.",
+        ],
+        "bearish": [
+            "Late debt cycle plus tightening credit — be careful with all risk assets.",
+            "In an All-Weather allocation this asset's weight should come down.",
+        ],
+        "neutral": ["The macro signals are mixed — wait."],
+    },
+    "marks": {
+        "bullish": [
+            "The market thermometer is in the fear zone; superior investing comes from buying well, not buying good assets.",
+            "I don't pay up for risk, but this time the risk is already priced in.",
+            "You can't predict but you can prepare — and now is the time to be prepared.",
+        ],
+        "bearish": [
+            "The thermometer is 80+ and into greed; that's when I choose to step away.",
+            "Valuation reverts to the mean eventually — chasing here is paying a tax.",
+        ],
+        "neutral": ["The temperature is mid-range — stand pat."],
+    },
+    "druck": {
+        "bullish": [
+            "The macro liquidity inflection is here, and this kind of name benefits most — worth a concentrated bet.",
+            "Always invest in the world 12-18 months out, and this fits the logic of that point.",
+            "When you're right, bet big — and now is the time.",
+        ],
+        "bearish": [
+            "Liquidity is still tightening; this valuation can't hold.",
+            "I only invest in the world 12-18 months out, and this theme is already stale.",
+        ],
+        "neutral": ["Not one of my high-conviction names — pass."],
+    },
+    "robertson": {
+        "bullish": [
+            "Relatively strongest in {industry} — the Tiger way is to go long the best.",
+            "Fundamentals lead the peer group; in a long-best/short-worst book this is the long leg.",
+        ],
+        "bearish": [
+            "Bottom-half of its industry ranking — I might short it to hedge the longs.",
+            "Not one I'd buy; we're experts at evaluating companies, not betting the index.",
+        ],
+        "neutral": ["Mid-pack ranking — no action."],
     },
     "burry": {
         "bullish": [
-            "{name}：资产真实、现金流真实、没人看。我买的从来不是热闹，是被错杀的数学。",
-            "市场对 {industry} 的恐慌制造了这个价格。I may be early, but I'm not wrong。",
+            "{name}: real assets, real cash flow, nobody looking. What I buy is never the hype — it's the mispriced math.",
+            "The market's panic over {industry} created this price. I may be early, but I'm not wrong.",
         ],
         "bearish": [
-            "{name} 的估值只有在'这次不一样'成立时才合理。剧透：从来没有不一样过——这是泡沫篮子里的票。",
-            "内部人在卖、散户在买，{industry} 的故事讲到第三章了。我见过这部电影的结局。",
+            "{name}'s valuation only makes sense if 'this time is different' holds. Spoiler: it never has — this is a bubble-basket name.",
+            "Insiders selling, retail buying, the {industry} story is on chapter three. I've seen how this movie ends.",
         ],
         "neutral": [
-            "{name} 还不够便宜到让我无视 {industry} 的周期风险。Watch. Wait. Reread the filings。",
+            "{name} isn't cheap enough yet for me to ignore the {industry} cycle risk. Watch. Wait. Reread the filings.",
         ],
     },
     "chanos": {
         "bullish": [
-            "难得：{name} 的现金流和报表利润对得上、审计干净。{industry} 里这种诚实生意我不做空——这本身就是褒奖。",
+            "Rare: {name}'s cash flow ties to reported earnings and the audit is clean. I don't short honest businesses in {industry} — that itself is a compliment.",
         ],
         "bearish": [
-            "{name} 的经营现金流和净利润背离了两年——利润是观点，现金是事实。Kynikos 的狗已经在叫了。",
-            "CEO 在媒体上越活跃，我越想看应收账款。{name} 是教科书级的 promotional company。",
+            "{name}'s operating cash flow and net income have diverged for two years — earnings are an opinion, cash is a fact. The Kynikos dogs are barking.",
+            "The more active the CEO is in the media, the more I want to see the receivables. {name} is a textbook promotional company.",
         ],
         "neutral": [
-            "{name} 的账面还挑不出硬伤，但 {industry} 的会计弹性太大，我保留怀疑的权利。",
+            "{name}'s books have no glaring holes yet, but {industry} accounting is elastic — I reserve the right to stay skeptical.",
         ],
     },
-    "zhang_lei": {
+
+    # ═══════════════ Group D · Technical / Trend ═══════════════
+    "livermore": {
         "bullish": [
-            "{name} 是值得'做时间的朋友'的生意：长跑道、宽护城河、与创始人的长期主义对齐。高瓴的钱是十年起步的。",
-            "{industry} 的复利机器不多，{name} 的 track record 已经自我验证。与伟大格局观者同行，剩下交给时间。",
+            "A breakout of a key level on supporting volume — the conditions to pyramid in are met.",
+            "Money isn't made in the buying and selling, it's made in the waiting — and this time the wait paid off.",
+            "The market is always right; the right side is the market's side — buy!",
         ],
         "bearish": [
-            "{name} 赚的是周期的钱不是结构的钱——时间不是它的朋友，是它的债主。",
-            "创始人已经离场，{name} 失去了长期对齐的锚。这不是高瓴的菜。",
+            "No breakout of the key level and the volume is wrong — no trade.",
+            "Never add against the trend.",
         ],
-        "neutral": [
-            "{name} 的生意质量够进研究清单，但价格还没到'重仓做时间朋友'的安全边际。继续跟踪。",
+        "neutral": ["Wait for the breakout signal."],
+    },
+    "minervini": {
+        "bullish": [
+            "Stage 2 + a VCP contraction + a rising 200-day — with 8 SEPA criteria met, I buy.",
+            "I only buy leaders, and this name meets the entire Trend Template.",
+            "Relative strength >70, within 25% of the high — a perfect entry setup.",
         ],
+        "bearish": [
+            "It's not in Stage 2 — I don't touch it.",
+            "Only 4 of the Trend Template criteria are met; it fails SEPA discipline.",
+            "A stop isn't a suggestion, it's an order — this location doesn't support an entry.",
+        ],
+        "neutral": ["The technicals aren't in position yet."],
+    },
+    "darvas": {
+        "bullish": [
+            "The top of the box broke on volume — a textbook Darvas Box buy point.",
+            "A pullback to the box top that holds confirms strength.",
+        ],
+        "bearish": ["Still chopping inside the box — no direction."],
+        "neutral": ["No trade until the box top breaks."],
+    },
+    "gann": {
+        "bullish": [
+            "About 55 trading days off the prior low (a Fibonacci window); the angle line supports a long.",
+            "The time cycle is in position; price motion follows natural law.",
+        ],
+        "bearish": ["The time window is entering a high-risk zone."],
+        "neutral": ["Time and price haven't resonated."],
+    },
+
+    # ═══════════════ Group G · Quant / Systematic ═══════════════
+    "simons": {
+        "bullish": ["A statistical price anomaly triggers a buy signal — if the model says buy, buy."],
+        "bearish": ["The mean-reversion signal shows overbought — trim."],
+        "neutral": ["The model has no clear signal."],
+    },
+    "thorp": {
+        "bullish": ["The Kelly criterion gives a positive position size; EV > 0, so bet."],
+        "bearish": ["Expected value is negative — don't touch it."],
+        "neutral": ["Math doesn't lie — EV is near zero, so no action."],
+    },
+    "shaw": {
+        "bullish": ["The multi-factor score is in the top 20% — quality and momentum both strong."],
+        "bearish": ["The multi-factor score is in the bottom 20% — sell across the board."],
+        "neutral": ["The factors are mixed — neutral."],
     },
     "asness": {
         "bullish": [
-            "{name} 在我的三因子上全亮：价值便宜、质量扎实、动量向上。这不是观点，是回归系数。",
-            "Value and momentum agreeing is rare——{name} 是 {industry} 里那个统计上的甜点。Factor 信号说买。",
+            "{name} lights up on all three of my factors: cheap on value, solid on quality, positive on momentum. That's not an opinion, it's a regression coefficient.",
+            "Value and momentum agreeing is rare — {name} is the statistical sweet spot in {industry}. The factor signal says buy.",
         ],
         "bearish": [
-            "{name} 是典型的 lottery ticket：高波动、负质量、纯靠故事。学术文献对这种票的长期回报只有一个词：糟糕。",
-            "贵 + 质量差 + 动量崩——三因子全反向，{name} 在我的 short leg 里。",
+            "{name} is a classic lottery ticket: high volatility, negative quality, pure story. The academic literature has one word for its long-run return: bad.",
+            "Expensive + poor quality + broken momentum — all three factors negative; {name} is in my short leg.",
         ],
         "neutral": [
-            "{name} 的因子信号互相打架：价值说买、动量说等。Sin a little——小仓或者不动。",
+            "{name}'s factor signals fight each other: value says buy, momentum says wait. Sin a little — small position or none.",
         ],
     },
+
+    # ═══════════════ Group H · Tech Leaders / AI CEOs ═══════════════
     "jensen_huang": {
         "bullish": [
-            "The more you buy, the more you save——{name} 在 AI 工厂的关键链路上，数据中心 Capex 的洪水正流向它。",
-            "{industry} 的需求按光速摩尔定律在跑，{name} 的产能就是入场券。We're at the iPhone moment of AI。",
+            "The more you buy, the more you save — {name} sits on a critical link of the AI factory, and the flood of data-center capex is flowing toward it.",
+            "Demand in {industry} runs on a light-speed Moore's law, and {name}'s capacity is the entry ticket. We're at the iPhone moment of AI.",
         ],
         "bearish": [
-            "{name} 不在加速计算的世界里——通用计算时代的生意，在 AI 工厂时代只会被重构。",
-            "{industry} 跟 AI 算力链没有交集，这不是我视野里的供应商。",
+            "{name} isn't in the accelerated-computing world — a general-computing business gets rebuilt in the AI-factory era.",
+            "{industry} has no overlap with the AI-compute chain; this isn't a supplier on my radar.",
         ],
         "neutral": [
-            "{name} 摸到了 AI 链的边，但还没进认证名单。供应链的门票要靠良率和交付说话。",
+            "{name} touches the edge of the AI chain but isn't on the qualified list yet. Supply-chain tickets are earned on yield and delivery.",
         ],
     },
     "musk": {
         "bullish": [
-            "用第一性原理拆 {name}：物理上成立、成本曲线能压、量产在爬坡。Production is hard——but they're through the hell。",
-            "{industry} 需要的是垂直整合的疯子，{name} 有这个基因。",
+            "Break {name} down from first principles: physically sound, the cost curve can be pressed, production is ramping. Production is hard — but they're through the hell.",
+            "{industry} needs a vertically integrated maniac, and {name} has that gene.",
         ],
         "bearish": [
-            "{name} 是 legacy 玩家在 {industry} 的缝缝补补——第一性原理下这个成本结构就不该存在。",
-            "PPT 造车我见多了。{name} 没有量产证据，物理不会撒谎。",
+            "{name} is a legacy player patching things together in {industry} — from first principles that cost structure shouldn't exist.",
+            "I've seen plenty of PowerPoint cars. {name} has no production proof, and physics doesn't lie.",
         ],
         "neutral": [
-            "{name} 的方向对，但 production hell 还没走完。等下一次产能爬坡数据。",
+            "{name}'s direction is right but production hell isn't over. Wait for the next capacity-ramp data.",
         ],
     },
     "altman": {
         "bullish": [
-            "{name} 卡在 AGI 供应链的瓶颈上——scaling laws 还在工作，算力和能源的需求曲线只会更陡。",
-            "{industry} 是智能时代的基建，{name} 的位置会被未来十年的 compute 需求反复重新定价。",
+            "{name} sits at a bottleneck of the AGI supply chain — scaling laws still work, and the demand curve for compute and energy only gets steeper.",
+            "{industry} is the infrastructure of the intelligence era, and {name}'s position gets repriced repeatedly by the next decade of compute demand.",
         ],
         "bearish": [
-            "{name} 在纯应用层，下一代模型可能把它的护城河直接蒸发。Build with the model, not against it。",
-            "{industry} 不在 AGI 的传导链上，这一轮浪潮跟它关系不大。",
+            "{name} is pure application layer — the next-gen model could evaporate its moat overnight. Build with the model, not against it.",
+            "{industry} isn't on the AGI transmission chain; this wave mostly passes it by.",
         ],
         "neutral": [
-            "{name} 的 AI 叙事成立，但 scaling 红利还没落到财报上。Cautiously optimistic。",
+            "{name}'s AI narrative holds, but the scaling dividend hasn't hit the financials yet. Cautiously optimistic.",
         ],
     },
     "saylor": {
         "bullish": [
-            "{name} 持有的是会升值的资产，欠的是会贬值的法币——这是数字时代的资产负债表炼金术。There is no second best。",
-            "法币每年融化，{name} 在 {industry} 里找到了对冲熵增的方式。Buy the dip, then buy more。",
+            "{name} holds an asset that appreciates and owes a fiat that depreciates — balance-sheet alchemy for the digital age. There is no second best.",
+            "Fiat melts every year, and {name} has found a way to hedge entropy in {industry}. Buy the dip, then buy more.",
         ],
         "bearish": [
-            "{name} 的资产负债表全是会融化的法币资产，没有硬通货敞口。这是在用冰块储蓄。",
-            "{industry} 跟数字资产没有任何交集，我的框架对它无话可说。",
+            "{name}'s balance sheet is all melting fiat assets with no hard-money exposure — that's saving in ice cubes.",
+            "{industry} has no intersection with digital assets; my framework has nothing to say about it.",
         ],
         "neutral": [
-            "{name} 有一点数字资产敞口但不纯粹。半个信徒不如不信——观望。",
+            "{name} has a little digital-asset exposure but isn't pure. Half a believer is worse than none — watch.",
         ],
     },
-    # v3.9.0 · 股海贼王 · 台词全部改写自其淘股吧真实发言 (docs/ghzw-dossier.md 有原文出处)
-    "ghzw": {
+
+    # ═══════════════ Group I · AI Bottleneck Hunter ═══════════════
+    # Serenity (@aleabitoreddit) — voice source: references/serenity-voice.md
+    "serenity": {
         "bullish": [
-            "{name} 复盘三问全答得上：为啥涨停、在 {industry} 板块什么地位、在大盘什么地位。主线+地位+承接都齐了，平盘就干。",
-            "逻辑硬的低位票爆发力足——{name} 就是这种，有联创那样的榜样在前，低位+硬逻辑我从不犹豫。",
-            "把 {name} 当 {industry} 这个时代的情绪载体看。当你的认知能判断它走出三五倍的时候，为什么恐高，为什么不格局？",
-            "弱转强快速板才是超预期，{name} 今天这个回封就是。接力做的就是这种确认，不是猜。",
+            "{name} sits on the irreplaceable node of {industry} — no substrate, no device. That kind of thing is a money printer, anon. Size it up, then go long.",
+            "I reverse-engineered the whole {industry} supply chain, and {name} is the 60%+-share duopoly bottleneck, still grossly mispriced. The market hasn't rotated here — I'm in early.",
+            "Everyone stares at the end-market megacaps; I only buy the companies they can't live without. {name} is the chokepoint strait of {industry} — irreplaceable, slow to expand, unpriced. Full size, no apology.",
+            "This is a bottleneck of a bottleneck. {name} pins the lifeline of {industry}; everyone downstream has to beg it for supply. Then go long — I'll draw the PT higher.",
         ],
         "bearish": [
-            "{name} 不在主线上。我十年做了两千多只票，全是跟着主线轮动出来的——逆主线做票就是给市场送钱。",
-            "盘口承接不行，弱转强没确认。{name} 这种走势我等盘面给答案，盘面没给，就不进。",
-            "高位接力六分之一的概率，错了太影响心态。{name} 现在这个位置我不满仓搞这种票。",
-            "没有涨停基因、龙虎榜也没人气，{name} 接力没有抓手。短线是体力活，别把力气花在没人的票上。",
+            "{name} is trivially replaceable in {industry} — three fabs can supply it. No chokepoint means nothing to me. Pass.",
+            "Staring at {name}'s EPS is pointless; it isn't on the {industry} bottleneck, just an ordinary link that can be routed around. No touch.",
+            "Supply isn't tight at all — {industry} capacity can ramp anytime, and {name} has zero irreplaceability. I never go long these.",
+            "{name} is the hot end-market megacap, not a chokepoint node. A crowded consensus trade — I'd rather watch or even fade it.",
         ],
         "neutral": [
-            "{name} 题材沾边但地位不清楚——是总龙还是跟风板？竞争格局没出来之前，我观望到尾盘再做决定。",
-            "{name} 的逻辑在我认知内，但今天消息出来盘面已经反应了。晚上复盘看逻辑还在不在，再决定接不接力。",
-            "每波行情赚十五个点就该休息——现在我仓位已经在主线票上，{name} 这种二线的先放观察。",
+            "{name} might be a potential chokepoint in {industry}, but it isn't hard-confirmed. I'll wait for customer roadmaps and a shortage signal before going long.",
+            "{name}'s bottleneck logic is half there — share is concentrated, but whether it can hold capacity is unproven. I want the backlog and ASP from the next earnings call.",
+            "The story exists, the mispricing hasn't fully set in. {name}'s position needs confirmation — I'll wait for an institutional-rotation signal and keep a small tracking position until then.",
         ],
     },
 }
@@ -788,8 +468,8 @@ def get_comment(investor_id: str, signal: str, ctx: dict) -> str:
             "roe": ctx.get("roe", "—"),
             "pe": ctx.get("pe", "—"),
             "price": ctx.get("price", "—"),
-            "name": ctx.get("name", "这只票"),
-            "industry": ctx.get("industry", "该行业"),
+            "name": ctx.get("name", "this stock"),
+            "industry": ctx.get("industry", "this industry"),
             "growth": ctx.get("growth", "—"),
             "stage": ctx.get("stage", "—"),
         })
@@ -798,10 +478,10 @@ def get_comment(investor_id: str, signal: str, ctx: dict) -> str:
 
 
 _GENERIC_FALLBACK = {
-    "bullish": ["数据支持买入。"],
-    "bearish": ["数据不支持。"],
-    "neutral": ["先观察。"],
-    "skip": ["不在能力圈范围内，不做评价。"],
+    "bullish": ["The data supports a buy."],
+    "bearish": ["The data doesn't support it."],
+    "neutral": ["Watch for now."],
+    "skip": ["Outside my circle of competence — no opinion."],
 }
 
 

@@ -45,8 +45,7 @@ class Persona:
             lines.append(f"\n## Key Metrics / Signals\n" + "\n".join(f"- {m}" for m in self.key_metrics[:8]))
         if self.avoids:
             lines.append(f"\n## Avoids\n" + "\n".join(f"- {a}" for a in self.avoids[:6]))
-        if self.a_share_view:
-            lines.append(f"\n## A-Share View\n{self.a_share_view.strip()[:300]}")
+        # US edition: the China-specific `a_share_view` field is no longer rendered.
         if self.voice:
             lines.append(f"\n## Voice / Tone\n{self.voice.strip()[:200]}")
         if self.famous_positions:
@@ -170,75 +169,80 @@ def load_all_personas() -> dict[str, Persona]:
     return result
 
 
-FRAMEWORK_INSTRUCTIONS_ZH = """你在参与一个多投资者 role-play 分析工作台。
+FRAMEWORK_INSTRUCTIONS = """You are part of a multi-investor role-play analysis workbench.
 
-你每次会扮演一个特定投资者，基于他/她的 philosophy + key_metrics + avoids + voice + a_share_view
-来对一只股票给出判断。规则：
+Each turn you play one specific investor and judge a stock through their
+philosophy + key_metrics + avoids + voice. Rules:
 
-1. **完全 in-character** · 不要假装中立，不要和稀泥
-   - 价值派恨科技股就直说
-   - 宏观派只看宏观，不评基本面
-   - 游资派只看盘口，不评 DCF
+1. **Stay fully in character** — do not pretend to be neutral or hedge.
+   - A value investor who hates richly-valued tech stocks should say so.
+   - A macro investor judges the macro setup, not line-by-line fundamentals.
+   - A technical/momentum trader reads price and volume, not DCF.
 
-2. **必须引用具体数据** · 从给定 SNAPSHOT 里抓 PE / ROE / 营收 / 市值 / 行业等具体数字
-   - ❌ "估值合理" → ✅ "PE 21 对 ROE 30% 的公司不贵"
-   - ❌ "基本面良好" → ✅ "营收 +27% 但 EPS 0，没转化为利润"
+2. **Cite concrete data** — pull specific numbers from the SNAPSHOT: P/E, ROE,
+   revenue, market cap, industry, etc.
+   - BAD: "valuation is reasonable" → GOOD: "a P/E of 21 on a 30% ROE business is not expensive"
+   - BAD: "fundamentals look fine" → GOOD: "revenue +27% but EPS flat — growth isn't converting to profit"
 
-3. **必须引用 persona 的 key_metrics** · 哪条命中、哪条不过 · 说清楚
-   - 巴菲特：ROE 连续 10 年 > 15% 必须提到
-   - 林奇：PEG < 1 必须计算
-   - 段永平：PE < 40 必须对照
-   - 赵老哥：市值射程、封板时间必须验证
+3. **Reference the persona's key_metrics** — state which screens pass and which fail.
+   - Buffett: ROE > 15% for 10 straight years must be addressed.
+   - Lynch: PEG < 1 must be computed.
+   - Klarman: margin of safety vs. intrinsic value must be checked.
 
-4. **输出 signal** · 明确 bullish / neutral / bearish / skip(不适合)
-5. **输出 verdict** · 明确 强烈买入 / 买入 / 关注 / 观望 / 回避 / 不适合
-6. **输出 reasoning** · 2-3 段 in-voice 文字，引用 voice 字段的风格词汇
+4. **Output a signal** — exactly one of bullish / neutral / bearish / skip (not a fit).
+5. **Output a verdict** — e.g. Strong Buy / Buy / Watch / Hold / Avoid / Not a fit.
+6. **Output reasoning** — 2-3 short paragraphs, in voice, citing data + key_metrics.
 
-如果 persona 是 auto_generated_stub（_meta.status）· 优先依据 Rules 引擎命中的具体规则，
-YAML voice 仅作语气补充。不要假装比 Rules 知道更多。
+If the persona is an auto_generated_stub (_meta.status), lean on the concrete
+rules the engine matched; the YAML voice only adds tone. Do not pretend to know
+more than the rules do.
 
-OUTPUT 要求严格 JSON 格式：
+OUTPUT must be strict JSON:
 {
   "investor_id": string,
   "signal": "bullish" | "neutral" | "bearish" | "skip",
   "score": 0-100,
   "verdict": string,
-  "headline": string (< 80 字 · 强结论),
-  "reasoning": string (2-3 段 in-voice · 引用数据 + key_metrics),
+  "headline": string (< 80 chars · strong conclusion),
+  "reasoning": string (2-3 paragraphs · in voice · cite data + key_metrics),
   "persona_used": "flagship" | "stub"
 }"""
+
+# Backwards-compat alias
+FRAMEWORK_INSTRUCTIONS_ZH = FRAMEWORK_INSTRUCTIONS
 
 
 def build_system_message(
     snapshot_json: str,
-    lang: str = "zh",
+    lang: str = "en",
     include_flagship_tips: bool = True,
 ) -> str:
-    """构建 prefix-stable system message（借鉴 augur · prompt cache 优化）.
+    """Build a prefix-stable system message (prompt-cache friendly).
 
-    51 persona 调用时全部用这个 message 作为 system · 只有 user message 不同（persona 切换）·
-    Anthropic / OpenAI prompt cache 能命中前缀，省 50-90% input token.
+    Every persona call uses this same system message; only the user message
+    differs (persona switch), so the Anthropic/OpenAI prompt cache hits the
+    shared prefix and saves 50-90% input tokens.
     """
     from lib.i18n import language_instruction
     parts = [
-        FRAMEWORK_INSTRUCTIONS_ZH,
+        FRAMEWORK_INSTRUCTIONS,
         "",
         language_instruction(lang),
         "",
-        "# MARKET SNAPSHOT（全体 persona 共享，请勿重复提取）",
+        "# MARKET SNAPSHOT (shared by all personas — do not re-extract)",
         snapshot_json,
     ]
     return "\n".join(parts)
 
 
 def build_persona_user_message(persona: Persona, ticker: str, task: str = "analyze") -> str:
-    """构建 persona 专用的 user message · 包含 persona block + 任务指令."""
+    """Build the persona-specific user message: persona block + task instruction."""
     return (
         persona.to_prompt_block()
         + f"\n\n---\n\n# TASK\n"
-        + f"现在请你以 {persona.name}（{persona.id}）的身份分析股票 {ticker}，"
-        + f"严格按照上面的 philosophy / key_metrics / voice。"
-        + f"输出 JSON 格式的 PersonaVote（见 system message 末尾的格式约束）。"
+        + f"Now, as {persona.name} ({persona.id}), analyze the stock {ticker}, "
+        + f"strictly following the philosophy / key_metrics / voice above. "
+        + f"Output a PersonaVote in JSON (see the format constraint at the end of the system message)."
     )
 
 

@@ -73,15 +73,14 @@ def test_medium_profile_opt_in():
 
 
 def test_deep_profile_default_on():
-    """v2.13.1 · deep 全 10 维覆盖."""
+    """US edition · deep covers the 7 kept playwright dims."""
     _reset_env()
     ap, _ = _reload_all()
     p = ap.get_profile("deep")
     assert p.playwright_mode == "default"
-    assert len(p.playwright_dims) == 10
+    assert len(p.playwright_dims) == 7
     expected = {"4_peers", "8_materials", "15_events", "17_sentiment",
-                "7_industry", "14_moat", "3_macro",
-                "13_policy", "18_trap", "19_contests"}
+                "7_industry", "14_moat", "3_macro"}
     assert p.playwright_dims == expected
 
 

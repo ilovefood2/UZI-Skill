@@ -47,11 +47,11 @@ def compute_scenarios(raw: dict, dimensions: dict) -> dict:
     return {
         "entry_price": entry_price,
         "cases": [
-            {"name": "最坏情况", "probability": "5%",  "return": round(-2 * sigma, 1)},
-            {"name": "偏差情况", "probability": "25%", "return": round(-1 * sigma + base_return * 0.2, 1)},
-            {"name": "合理情况", "probability": "40%", "return": round(base_return, 1)},
-            {"name": "乐观情况", "probability": "25%", "return": round(1 * sigma + base_return * 0.5, 1)},
-            {"name": "极致乐观", "probability": "5%",  "return": round(2 * sigma + base_return, 1)},
+            {"name": "Worst case", "probability": "5%",  "return": round(-2 * sigma, 1)},
+            {"name": "Bear case",  "probability": "25%", "return": round(-1 * sigma + base_return * 0.2, 1)},
+            {"name": "Base case",  "probability": "40%", "return": round(base_return, 1)},
+            {"name": "Bull case",  "probability": "25%", "return": round(1 * sigma + base_return * 0.5, 1)},
+            {"name": "Best case",  "probability": "5%",  "return": round(2 * sigma + base_return, 1)},
         ],
     }
 
@@ -63,54 +63,47 @@ def compute_exit_triggers(raw: dict, dimensions: dict, synthesis: dict) -> list[
     kline = (raw.get("dimensions", {}).get("2_kline") or {}).get("data") or {}
     val = (raw.get("dimensions", {}).get("10_valuation") or {}).get("data") or {}
     chain = (raw.get("dimensions", {}).get("5_chain") or {}).get("data") or {}
-    lhb = (raw.get("dimensions", {}).get("16_lhb") or {}).get("data") or {}
     research = (raw.get("dimensions", {}).get("6_research") or {}).get("data") or {}
 
-    # 1. 技术止损 ~ MA60
+    # 1. Technical stop ~ MA60
     ma60 = (kline.get("ma60_60d") or [])
     ma60_last = next((v for v in reversed(ma60) if v), None)
     if ma60_last:
-        triggers.append(f"股价跌破 ¥{ma60_last:.2f}（60 日均线支撑位）→ 无条件止损")
+        triggers.append(f"Price breaks below ${ma60_last:.2f} (60-day MA support) → hard stop")
     else:
         price = basic.get("price") or 0
-        triggers.append(f"股价跌破 ¥{price * 0.88:.2f}（当前价 -12%）→ 无条件止损")
+        triggers.append(f"Price breaks below ${price * 0.88:.2f} (current price -12%) → hard stop")
 
-    # 2. 基本面恶化 — 大客户
+    # 2. Fundamental deterioration — key customer
     downstream = chain.get("downstream", "")
     if downstream and downstream != "—":
         main_client = downstream.split("/")[0].strip()
-        triggers.append(f"{main_client} 季度指引下修 > 10% → 产业链逻辑动摇")
+        triggers.append(f"{main_client} cuts quarterly guidance > 10% → supply-chain thesis weakens")
     else:
-        triggers.append("下季度营收同比转负 → 基本面反转信号")
+        triggers.append("Next-quarter revenue turns negative YoY → fundamental-reversal signal")
 
-    # 3. 业绩不达
+    # 3. Earnings miss
     growth_str = research.get("upside", "+15%")
     g = _parse_pct(growth_str)
     if g > 0:
         min_growth = max(10, int(g - 15))
-        triggers.append(f"下次业绩预告低于 +{min_growth}% → 预期管理失守")
+        triggers.append(f"Next guidance below +{min_growth}% → expectations management breaks down")
     else:
-        triggers.append("连续两期业绩不及券商预期中位数 → 逻辑失效")
+        triggers.append("Two straight quarters below the consensus median → thesis invalidated")
 
-    # 4. 游资撤离
-    matched = lhb.get("matched_youzi", "")
-    if isinstance(matched, list):
-        matched_str = " / ".join(matched[:2])
-    else:
-        matched_str = str(matched).split("/")[0] if matched else "顶级游资"
-    if matched_str and matched_str not in ("", "—"):
-        triggers.append(f"{matched_str} 席位大额卖出 > 2 亿 → 顶级资金撤离信号")
+    # 4. Institutional selling
+    triggers.append("Major institutional holder cuts position materially → smart-money exit signal")
 
-    # 5. 估值泡沫
+    # 5. Valuation bubble
     pe_quant = val.get("pe_quantile", "")
     import re
     m = re.search(r'(\d+)', str(pe_quant))
     if m:
         cur_q = int(m.group(1))
         target = min(95, cur_q + 15)
-        triggers.append(f"PE 站上 5 年 {target} 分位（≈ {val.get('pe', '—')} × {1 + (target - cur_q) / 100:.2f}）→ 泡沫区获利了结")
+        triggers.append(f"P/E rises to its 5-yr {target}th percentile (≈ {val.get('pe', '—')} × {1 + (target - cur_q) / 100:.2f}) → take profit in the bubble zone")
     else:
-        triggers.append("PE 站上 5 年 90 分位 → 泡沫区获利了结")
+        triggers.append("P/E rises to its 5-yr 90th percentile → take profit in the bubble zone")
 
     return triggers[:5]
 
