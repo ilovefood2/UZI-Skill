@@ -33,7 +33,8 @@ def test_dependent_dims_set():
     from lib.pipeline.collect import DEPENDENT_DIMS
     assert "3_macro" in DEPENDENT_DIMS
     assert "7_industry" in DEPENDENT_DIMS
-    assert "9_futures" in DEPENDENT_DIMS
-    assert "13_policy" in DEPENDENT_DIMS
-    # 0_basic 不应该在
+    # US edition: 9_futures / 13_policy removed
+    assert "9_futures" not in DEPENDENT_DIMS
+    assert "13_policy" not in DEPENDENT_DIMS
+    # 0_basic should not be in
     assert "0_basic" not in DEPENDENT_DIMS

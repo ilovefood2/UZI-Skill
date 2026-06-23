@@ -101,9 +101,11 @@ def test_install_hermes_md_promotes_script():
 
 
 def test_readme_links_to_install_script():
-    """README 安装表必须更新 · 不能继续说 hermes skills install 就行."""
+    """US edition README is rewritten and no longer promotes the Hermes install path."""
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-    assert "install-hermes.sh" in readme
+    # The install-hermes.sh script still exists for Hermes users, but the
+    # streamlined US README intentionally drops the Hermes-specific section.
+    assert "Install" in readme
 
 
 # ─── #6 · 不要绕过用户意图 ──────────────────────────────

@@ -151,25 +151,17 @@ def test_render_war_report_has_main():
 
 # ─── BUG (v2.5) · HK 主链路必须独立 try/except ──
 def test_hk_branches_isolated():
-    """fetch_peers/capital_flow/events 的 HK 分支必须独立 try/except 不污染 A 股"""
-    for fn_name in ("fetch_peers.py", "fetch_capital_flow.py", "fetch_events.py"):
+    """fetch_peers/events HK branches must use isolated try/except (US edition keeps these fetchers)."""
+    for fn_name in ("fetch_peers.py", "fetch_events.py"):
         src = (SCRIPTS_DIR / fn_name).read_text(encoding="utf-8")
         if "ti.market == \"H\"" in src:
-            # Find the H branch
             h_idx = src.find('ti.market == "H"')
             block = src[h_idx:h_idx + 2000]
-            # Should have at least one try/except in the HK block
             assert "try:" in block or "except" in block, \
-                f"BUG regression: {fn_name} HK branch 必须有 try/except 隔离"
+                f"BUG regression: {fn_name} HK branch must have try/except isolation"
 
 
-# ─── BUG#R5 (v2.7.1) · 19_contests login_required 必须透明标记 ──
-def test_contests_login_required_marked():
-    src = (SCRIPTS_DIR / "fetch_contests.py").read_text(encoding="utf-8")
-    assert "login_required" in src, \
-        "BUG#R5 regression: fetch_contests 必须返回 login_required 标记（XueQiu 2026 起需登录）"
-    assert "xueqiu_browser" in src, \
-        "BUG#R5 regression: fetch_contests 必须 fallback 到 lib.xueqiu_browser"
+# (US edition) fetch_contests login test removed — the contests dimension is China-only.
 
 
 # ─── BUG#R5 (v2.7.1) · xueqiu_browser 模块必须存在 + 默认 opt-in ──
@@ -264,11 +256,11 @@ def test_trusted_domains_covers_qualitative_dims():
 
 # ─── v2.7.3 · 关键 fetcher 必须引用 search_trusted ──
 def test_qualitative_fetchers_use_search_trusted():
-    """fetch_macro / fetch_policy / fetch_events / fetch_moat 必须调 search_trusted"""
-    for fname in ("fetch_macro.py", "fetch_policy.py", "fetch_events.py", "fetch_moat.py"):
+    """Qualitative fetchers must call search_trusted (US edition: fetch_policy removed)."""
+    for fname in ("fetch_macro.py", "fetch_events.py", "fetch_moat.py"):
         src = (SCRIPTS_DIR / fname).read_text(encoding="utf-8")
         assert "search_trusted" in src, \
-            f"v2.7.3 regression: {fname} 没接入 search_trusted（权威域搜索失效）"
+            f"v2.7.3 regression: {fname} no longer wires search_trusted"
 
 
 # ─── v2.7.3 · registry 必须含 Codex 建议的权威源 ──
@@ -448,13 +440,7 @@ def test_metals_industries_have_materials_coverage():
         assert len(INDUSTRY_MATERIALS[ind]) >= 1
 
 
-def test_metals_industries_have_futures_coverage():
-    """工业金属/贵金属/能源金属 在 INDUSTRY_FUTURES 里必须有主连合约"""
-    from fetch_futures import INDUSTRY_FUTURES
-    for ind in ("工业金属", "贵金属", "能源金属"):
-        assert ind in INDUSTRY_FUTURES, f"BUG#R10-coverage: INDUSTRY_FUTURES 缺 {ind!r}"
-        name, code = INDUSTRY_FUTURES[ind]
-        assert name is not None and code is not None, f"{ind} 必须有主连合约非 None"
+# (US edition) INDUSTRY_FUTURES coverage test removed — the futures dimension is China-only.
 
 
 def test_metals_industries_have_peers_alias():

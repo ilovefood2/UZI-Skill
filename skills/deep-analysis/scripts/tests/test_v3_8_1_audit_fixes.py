@@ -20,8 +20,9 @@ SCRIPTS = Path(__file__).resolve().parent.parent
 REPO = SCRIPTS.parents[2]
 sys.path.insert(0, str(SCRIPTS))
 
+# US edition: zhang_lei (Hillhouse, China) removed
 NEW_IDS = ["andreessen", "gurley", "naval", "gerstner", "chamath",
-           "burry", "chanos", "zhang_lei", "asness",
+           "burry", "chanos", "asness",
            "jensen_huang", "musk", "altman", "saylor"]
 
 
@@ -115,8 +116,10 @@ def test_skill_md_no_stale_counts():
         assert not stale, f"{rel} 仍有过时计数: {stale}"
 
 
-def test_evaluate_all_covers_65():
-    """evaluate_all 批量评估覆盖全部 65 人 (INVESTOR_RULES 全注册)."""
+def test_evaluate_all_covers_roster():
+    """Every investor in the roster has a registered rule (US edition: 35)."""
     from lib.investor_criteria import INVESTOR_RULES
     from lib.investor_db import INVESTORS
-    assert len(INVESTOR_RULES) == len(INVESTORS) == 66  # v3.9.0 +ghzw
+    assert len(INVESTORS) == 35
+    missing = [i["id"] for i in INVESTORS if i["id"] not in INVESTOR_RULES]
+    assert not missing, f"INVESTOR_RULES missing rules for: {missing}"

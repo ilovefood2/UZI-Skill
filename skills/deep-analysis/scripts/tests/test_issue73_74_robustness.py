@@ -29,7 +29,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 # ─── #73 · SKILL.md 版本同步 ─────────────────────────────
 
-SKILLS = ["deep-analysis", "investor-panel", "lhb-analyzer", "trap-detector"]
+SKILLS = ["deep-analysis", "investor-panel"]  # US edition: lhb-analyzer, trap-detector removed
 
 
 def _manifest_version() -> str:

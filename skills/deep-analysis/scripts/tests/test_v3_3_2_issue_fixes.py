@@ -70,11 +70,4 @@ def test_xueqiu_browser_fetch_uses_new_endpoint():
     )
 
 
-def test_fetch_contests_uses_new_endpoint():
-    """fetch_contests.fetch_xueqiu_cubes 必须用新 endpoint."""
-    import inspect
-    import fetch_contests
-    src = inspect.getsource(fetch_contests.fetch_xueqiu_cubes)
-    assert "query/v1/search/cube/stock.json" in src, (
-        "v3.3.2 regression: fetch_contests 仍用老 endpoint"
-    )
+# (US edition) fetch_contests test removed — the contests dimension is China-only.

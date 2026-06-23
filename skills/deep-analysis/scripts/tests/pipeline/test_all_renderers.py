@@ -8,23 +8,23 @@ SCRIPTS = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(SCRIPTS))
 
 
+# US edition: 15 renderers (China-only dims removed:
+# 9_futures, 12_capital_flow, 13_policy, 16_lhb, 18_trap, 19_contests)
 ALL_DIMS = [
     "0_basic", "1_financials", "2_kline", "3_macro", "4_peers",
     "5_chain", "6_fund_holders", "6_research", "7_industry", "8_materials",
-    "9_futures", "10_valuation", "11_governance", "12_capital_flow",
-    "13_policy", "14_moat", "15_events", "16_lhb", "17_sentiment",
-    "18_trap", "19_contests",
+    "10_valuation", "11_governance", "14_moat", "15_events", "17_sentiment",
 ]
 
 
-def test_registry_has_all_21_renderers():
-    """全部 21 个 dim 都有对应 renderer."""
+def test_registry_has_all_renderers():
+    """Every kept dim has a corresponding renderer."""
     from lib.pipeline.renderer import list_renderers, RENDERER_REGISTRY
     registered = set(list_renderers())
     expected = set(ALL_DIMS)
     missing = expected - registered
-    assert not missing, f"缺少 renderer: {missing}"
-    assert len(RENDERER_REGISTRY) == 21, f"注册表应 21 个，实际 {len(RENDERER_REGISTRY)}"
+    assert not missing, f"missing renderer: {missing}"
+    assert len(RENDERER_REGISTRY) == 15, f"registry should have 15, got {len(RENDERER_REGISTRY)}"
 
 
 def test_each_renderer_instantiable():
@@ -68,36 +68,7 @@ def test_valuation_renderer_percentile():
     assert "5%" in html
 
 
-def test_policy_renderer_sentiment_emoji():
-    from lib.pipeline.renderer import get_renderer, RenderContext
-    r = get_renderer("13_policy")
-    ctx = RenderContext(ticker="x", name="y",
-                        data={"policy_dir": "积极", "subsidy": "积极",
-                              "monitoring": "中性", "anti_trust": "收紧"})
-    html = r.render(ctx)
-    assert "🟢" in html  # 积极
-    assert "🟡" in html  # 中性
-    assert "🔴" in html  # 收紧
-
-
-def test_trap_renderer_high_risk_color():
-    from lib.pipeline.renderer import get_renderer, RenderContext
-    r = get_renderer("18_trap")
-    ctx = RenderContext(ticker="x", name="y",
-                        data={"risk_score": 75, "warning_flags": ["异常换手", "高位融资"]})
-    html = r.render(ctx)
-    assert "75" in html
-    assert "高风险" in html
-    assert "异常换手" in html
-
-
-def test_lhb_gap_when_no_record():
-    from lib.pipeline.renderer import get_renderer, RenderContext
-    r = get_renderer("16_lhb")
-    ctx = RenderContext(ticker="x", name="y",
-                        data={"lhb_count_30d": 0, "lhb_records": [], "matched_youzi": []})
-    html = r.render(ctx)
-    assert "section-gap" in html or "未上龙虎榜" in html
+# (US edition) policy / trap / lhb renderer tests removed — those dimensions are China-only.
 
 
 def test_materials_renderer_list_detail():

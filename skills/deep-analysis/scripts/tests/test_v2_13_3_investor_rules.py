@@ -23,20 +23,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 # ─── Fix 1 · 游资射程 ────────────────────────────────────────────
 
-def test_youzi_out_of_range_for_mega_cap():
-    """9456 亿大盘股不在任何常规游资的射程（章盟主 allowlist 除外）."""
-    from lib.investor_evaluator import _is_youzi_out_of_range
-    features = {"market_cap_yi": 9456, "market_cap": 9456e8, "stage_num": 2}
-    # 大部分游资（无 max_mcap 的）都应 skip 超大盘
-    out, reason = _is_youzi_out_of_range("sun_ge", features)
-    assert out is True
-    assert "9456" in reason or "射程" in reason
-
-    out, reason = _is_youzi_out_of_range("zhao_lg", features)
-    assert out is True
-
-    out, reason = _is_youzi_out_of_range("fs_wyj", features)  # 佛山无影脚 max_mcap=80 亿
-    assert out is True
+# (US edition) youzi market-cap range test removed — the A-share youzi school is gone.
 
 
 def test_zhang_mz_allowlist_can_play_mega_cap():

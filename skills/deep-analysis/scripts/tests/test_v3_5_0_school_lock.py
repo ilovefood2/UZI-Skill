@@ -31,9 +31,9 @@ def test_locked_school_unset_returns_empty():
 
 def test_locked_school_lowercase_normalized():
     from lib.investor_evaluator import get_locked_school
-    os.environ["UZI_SCHOOL"] = "f"
+    os.environ["UZI_SCHOOL"] = "g"
     try:
-        assert get_locked_school() == "F"
+        assert get_locked_school() == "G"
     finally:
         os.environ.pop("UZI_SCHOOL", None)
 
@@ -50,26 +50,24 @@ def test_locked_school_invalid_ignored():
 
 def test_school_labels_cover_seven_groups():
     from lib.investor_evaluator import SCHOOL_LABELS
-    # v3.6.3 · I 组「AI 卡位/瓶颈猎手」(重磅角色 Serenity, 独立成组) · H 组为 v3.7.0 科技领袖派
-    assert set(SCHOOL_LABELS.keys()) == {"A", "B", "C", "D", "E", "F", "G", "H", "I"}
-    # 标签都是非空中文
+    # US edition: schools A/B/C/D/G/H/I (China-value E and youzi F removed)
+    assert set(SCHOOL_LABELS.keys()) == {"A", "B", "C", "D", "G", "H", "I"}
     for k, v in SCHOOL_LABELS.items():
-        assert v and isinstance(v, str), f"{k} 标签缺失"
+        assert v and isinstance(v, str), f"{k} label missing"
 
 
 # ─── #2 · evaluator skip 非锁定派 ────────────────────────
 
 def test_evaluate_skips_non_locked_school():
-    """锁定 F 派 · buffett (A 派) 应该 skip · 不进规则引擎."""
+    """Lock school D · buffett (school A) should skip · not enter the rule engine."""
     from lib.investor_evaluator import evaluate
-    os.environ["UZI_SCHOOL"] = "F"
+    os.environ["UZI_SCHOOL"] = "D"
     try:
-        features = {"market": "A", "ticker": "300394.SZ", "name": "天孚通信",
-                    "industry": "光器件", "market_cap_yi": 1500}
+        features = {"market": "U", "ticker": "AAPL", "name": "Apple",
+                    "industry": "Consumer Electronics", "market_cap_yi": 30000}
         result = evaluate("buffett", features)
-        assert result["signal"] == "skip", "A 派评委在 F 锁定下应 skip"
-        assert "锁定" in result.get("skip_reason", ""), "skip 理由必须说明是用户锁定"
-        assert "F" in result.get("skip_reason", "") or "游资" in result.get("skip_reason", "")
+        assert result["signal"] == "skip", "a school-A juror should skip under a D lock"
+        assert "D" in result.get("skip_reason", "")
     finally:
         os.environ.pop("UZI_SCHOOL", None)
 
@@ -126,10 +124,10 @@ def test_school_lock_banner_unknown_group_falls_back():
 # ─── #4 · run.py argparse ────────────────────────────────
 
 def test_run_py_has_school_argument():
-    """v3.5.0 · run.py argparse 必须含 --school choices=[A-G]."""
+    """US edition · run.py argparse must include --school with the kept schools."""
     run_py = (Path(__file__).resolve().parents[4] / "run.py").read_text(encoding="utf-8")
     assert '"--school"' in run_py
-    # v3.7.0 起 choices 扩到 A-I (新增 H 科技领袖派 + I Serenity 卡位猎手)
-    assert 'choices=["A", "B", "C", "D", "E", "F", "G", "H", "I"]' in run_py
-    # 应设置 UZI_SCHOOL env · 让 evaluator 读取
+    # US edition: China-value E and youzi F removed
+    assert 'choices=["A", "B", "C", "D", "G", "H", "I"]' in run_py
+    # must set UZI_SCHOOL env for the evaluator to read
     assert 'UZI_SCHOOL' in run_py

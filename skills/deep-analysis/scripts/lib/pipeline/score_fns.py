@@ -74,14 +74,14 @@ def score_dimensions(raw: dict) -> dict:
     score_1 = max(1, min(10, score_1))
     reasons_pass_1 = []
     reasons_fail_1 = []
-    if last_roe >= 15: reasons_pass_1.append(f"ROE 最新 {last_roe:.1f}%")
-    elif last_roe < 8: reasons_fail_1.append(f"ROE 最新 {last_roe:.1f}% 偏低")
-    if growth >= 20: reasons_pass_1.append(f"营收增速 {growth:.1f}%")
-    elif growth < 5: reasons_fail_1.append(f"营收增速 {growth:.1f}% 停滞")
-    if debt < 40: reasons_pass_1.append(f"资产负债率 {debt:.0f}% 健康")
-    elif debt > 60: reasons_fail_1.append(f"资产负债率 {debt:.0f}% 偏高")
+    if last_roe >= 15: reasons_pass_1.append(f"ROE latest {last_roe:.1f}%")
+    elif last_roe < 8: reasons_fail_1.append(f"ROE latest {last_roe:.1f}% is low")
+    if growth >= 20: reasons_pass_1.append(f"revenue growth {growth:.1f}%")
+    elif growth < 5: reasons_fail_1.append(f"revenue growth {growth:.1f}% stalled")
+    if debt < 40: reasons_pass_1.append(f"debt ratio {debt:.0f}% healthy")
+    elif debt > 60: reasons_fail_1.append(f"debt ratio {debt:.0f}% elevated")
     out["1_financials"] = {"score": score_1, "weight": 5,
-                            "label": f"ROE {last_roe:.1f}% · 营收增速 {growth:+.1f}% · 负债率 {debt:.0f}%",
+                            "label": f"ROE {last_roe:.1f}% · rev growth {growth:+.1f}% · debt {debt:.0f}%",
                             "reasons_pass": reasons_pass_1, "reasons_fail": reasons_fail_1}
 
     # 2 · K 线
@@ -98,14 +98,14 @@ def score_dimensions(raw: dict) -> dict:
     dd = _f(dd_str)
     if dd <= -30: score_2 -= 1
     score_2 = max(1, min(10, score_2))
-    label_2 = f"{stage} · 均线{ma_align}"
+    label_2 = f"{stage} · MA {ma_align}"
     if stats.get("ytd_return"): label_2 += f" · YTD {stats['ytd_return']}"
     out["2_kline"] = {"score": score_2, "weight": 4, "label": label_2,
                       "reasons_pass": [f"{stage}"] if "Stage 2" in stage else [],
-                      "reasons_fail": [f"最大回撤 {dd:.1f}%"] if dd <= -25 else []}
+                      "reasons_fail": [f"max drawdown {dd:.1f}%"] if dd <= -25 else []}
 
-    # 3 · 宏观 (qualitative — give middle)
-    out["3_macro"] = {"score": 6, "weight": 3, "label": "宏观环境中性"}
+    # 3 · macro (qualitative — give middle)
+    out["3_macro"] = {"score": 6, "weight": 3, "label": "Macro backdrop neutral"}
 
     # 4 · 同行
     peers = _get("4_peers")
@@ -124,35 +124,35 @@ def score_dimensions(raw: dict) -> dict:
         except Exception:
             pass
     out["4_peers"] = {"score": score_4, "weight": 4,
-                      "label": f"同业 {len(peer_table) - 1} 家对比" if peer_table else "无同行数据",
+                      "label": f"{len(peer_table) - 1} peers compared" if peer_table else "no peer data",
                       "reasons_pass": [], "reasons_fail": []}
 
-    # 5 · 上下游
+    # 5 · supply chain
     chain = _get("5_chain")
     breakdown = chain.get("main_business_breakdown") or []
     score_5 = 6 if breakdown else 5
     out["5_chain"] = {"score": score_5, "weight": 4,
-                      "label": f"主营 {len(breakdown)} 类业务已识别" if breakdown else "产业链数据不完整",
+                      "label": f"{len(breakdown)} business segments identified" if breakdown else "supply-chain data incomplete",
                       "reasons_pass": [], "reasons_fail": []}
 
     # 6 · 研报
     research = _get("6_research")
     coverage = research.get("report_count", 0)
     ratings = research.get("rating_distribution") or {}
-    buy_count = sum(v for k, v in ratings.items() if "买入" in str(k) or "增持" in str(k))
+    buy_count = sum(v for k, v in ratings.items() if "buy" in str(k).lower() or "overweight" in str(k).lower() or "买入" in str(k) or "增持" in str(k))
     score_6 = 5 + min(3, coverage // 5)
     if buy_count >= 10: score_6 += 1
     score_6 = min(10, score_6)
     out["6_research"] = {"score": score_6, "weight": 3,
-                         "label": f"{coverage} 份研报 · 买入/增持 {buy_count} 份" if coverage else "研报数据稀少",
-                         "reasons_pass": [f"覆盖券商 {coverage} 家"] if coverage >= 10 else [],
-                         "reasons_fail": [] if coverage else ["缺乏覆盖"]}
+                         "label": f"{coverage} analyst reports · {buy_count} Buy/Overweight" if coverage else "sparse analyst coverage",
+                         "reasons_pass": [f"{coverage} firms covering"] if coverage >= 10 else [],
+                         "reasons_fail": [] if coverage else ["lacks coverage"]}
 
-    # 7 · 行业景气 (stub heavy qualitative)
-    out["7_industry"] = {"score": 7, "weight": 4, "label": "行业处于成长期"}
+    # 7 · industry (stub heavy qualitative)
+    out["7_industry"] = {"score": 7, "weight": 4, "label": "Industry in a growth phase"}
 
-    # 8 · 原材料
-    out["8_materials"] = {"score": 6, "weight": 3, "label": "原材料成本关注中"}
+    # 8 · raw materials
+    out["8_materials"] = {"score": 6, "weight": 3, "label": "Input-cost watch"}
 
     # 10 · 估值
     val = _get("10_valuation")
@@ -167,9 +167,9 @@ def score_dimensions(raw: dict) -> dict:
     elif pe_q < 85: score_10 = 3
     else: score_10 = 2
     out["10_valuation"] = {"score": score_10, "weight": 5,
-                            "label": f"PE {val.get('pe', '—')} · 5 年 {pe_q} 分位 · 行业均值 {val.get('industry_pe', '—')}",
-                            "reasons_pass": ["PE 在 5 年中位数以下"] if pe_q < 50 else [],
-                            "reasons_fail": ["PE 已在 5 年高位区"] if pe_q >= 75 else []}
+                            "label": f"P/E {val.get('pe', '—')} · {pe_q}th 5-yr percentile · industry avg {val.get('industry_pe', '—')}",
+                            "reasons_pass": ["P/E below its 5-yr median"] if pe_q < 50 else [],
+                            "reasons_fail": ["P/E in its 5-yr high zone"] if pe_q >= 75 else []}
 
     # 11 · 治理
     gov = _get("11_governance")
@@ -179,18 +179,18 @@ def score_dimensions(raw: dict) -> dict:
     if not pledge or (isinstance(pledge, list) and len(pledge) == 0): score_11 += 1
     if has_insider: score_11 += 1
     out["11_governance"] = {"score": min(10, score_11), "weight": 4,
-                             "label": f"质押记录 {len(pledge) if isinstance(pledge, list) else '—'} · 内部交易 {'有' if has_insider else '无'}"}
+                             "label": f"pledge records {len(pledge) if isinstance(pledge, list) else '—'} · insider trades {'yes' if has_insider else 'no'}"}
 
-    # 14 · 护城河
-    out["14_moat"] = {"score": 6, "weight": 3, "label": "护城河需定性评估"}
+    # 14 · moat
+    out["14_moat"] = {"score": 6, "weight": 3, "label": "Moat needs qualitative review"}
 
-    # 15 · 事件
+    # 15 · events
     events = _get("15_events")
     news = events.get("news") or []
     notices = events.get("recent_notices") or []
     score_15 = 5 + min(3, len(news) // 10)
     out["15_events"] = {"score": score_15, "weight": 4,
-                        "label": f"近期新闻 {len(news)} 条 · 公告 {len(notices)} 份"}
+                        "label": f"{len(news)} recent news · {len(notices)} filings"}
 
     # 17 · 舆情 / sentiment
     hot = _get("17_sentiment")

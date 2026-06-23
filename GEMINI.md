@@ -1,31 +1,33 @@
-# UZI-Skill · Gemini CLI 指令
+# UZI-Skill (US edition) · Gemini CLI instructions
 
-## 安装
+## Install
 
 ```bash
 gemini extensions install https://github.com/wbh604/UZI-Skill
 ```
 
-更新：
+Update:
 
 ```bash
 gemini extensions update stock-deep-analyzer
 ```
 
-## 使用
+## Usage
 
-对 Gemini 说"分析 贵州茅台"，或直接执行：
+Tell Gemini "analyze AAPL", or run directly:
 
 ```bash
 pip install -r requirements.txt
-python run.py 贵州茅台 --no-browser
+python run.py AAPL --no-browser
 ```
 
-## 完整流程
+US-listed tickers only.
 
-参考 `AGENTS.md` 和 `skills/deep-analysis/SKILL.md`。
+## Full flow
 
-核心是两段式：
-1. `stage1()` — 数据采集 + 规则引擎骨架分
-2. Agent 分析 — 读 panel.json，逐组 role-play 66 评委
-3. `stage2()` — 生成 Bloomberg 风格 HTML 报告
+See `AGENTS.md` and `skills/deep-analysis/SKILL.md`.
+
+The core is a two-stage flow:
+1. `stage1()` — data collection + rule-engine skeleton scores
+2. Agent analysis — read panel.json, role-play the 35 jurors group by group
+3. `stage2()` — generate the Bloomberg-style HTML report

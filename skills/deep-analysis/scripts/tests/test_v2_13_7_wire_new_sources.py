@@ -180,37 +180,4 @@ def test_kline_us_chain_falls_through_to_yahoo_v8(monkeypatch):
     assert rows[0]["收盘"] == 100
 
 
-# ─── cfachina 接入 fetch_policy ─────────────────────────────────
-
-def test_fetch_policy_futures_industry_calls_cfachina(monkeypatch):
-    """期货/商品 industry 时，fetch_policy 应触发 _fetch_cfachina_titles."""
-    import fetch_policy
-    called = {"cfa": 0}
-
-    def fake_cfa(limit=10):
-        called["cfa"] += 1
-        return [{"title": "期货监管公告", "body": "", "url": "x"}]
-
-    monkeypatch.setattr(fetch_policy, "_fetch_cfachina_titles", fake_cfa)
-    monkeypatch.setattr(fetch_policy, "search_trusted", lambda *a, **k: [])
-
-    r = fetch_policy.main(industry="期货衍生品")
-    assert called["cfa"] == 1
-    assert r["data"]["cfachina_titles_count"] == 1
-    assert "cfachina" in r["source"]
-
-
-def test_fetch_policy_non_futures_skips_cfachina(monkeypatch):
-    """非期货 industry（如光学光电子）不调 cfachina."""
-    import fetch_policy
-    called = {"cfa": 0}
-
-    def fake_cfa(limit=10):
-        called["cfa"] += 1
-        return []
-
-    monkeypatch.setattr(fetch_policy, "_fetch_cfachina_titles", fake_cfa)
-    monkeypatch.setattr(fetch_policy, "search_trusted", lambda *a, **k: [])
-
-    fetch_policy.main(industry="光学光电子")
-    assert called["cfa"] == 0
+# (US edition) fetch_policy / cfachina tests removed — the policy dimension is China-only.

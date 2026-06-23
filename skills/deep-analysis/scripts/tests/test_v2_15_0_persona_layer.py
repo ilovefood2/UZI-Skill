@@ -16,13 +16,14 @@ def test_personas_dir_exists():
     assert PERSONAS_DIR.exists(), "personas/ 目录必须存在"
 
 
-def test_51_persona_files_present():
+def test_persona_files_present():
+    """US edition: 22 persona YAMLs after removing China-value (E) and youzi (F)."""
     yamls = list(PERSONAS_DIR.glob("*.yaml"))
-    assert len(yamls) == 51, f"应有 51 个 persona YAML，实际 {len(yamls)}"
+    assert len(yamls) == 22, f"expected 22 persona YAMLs, got {len(yamls)}"
 
 
-def test_12_flagship_personas():
-    """flagship 必须是手写（无 _meta.status=auto_generated_stub）· 12 个."""
+def test_flagship_personas():
+    """flagship = hand-written (no _meta.status=auto_generated_stub). US edition: 8."""
     from lib.personas import load_all_personas
     all_p = load_all_personas()
     flagship_ids = {p.id for p in all_p.values() if p.is_flagship}
@@ -30,33 +31,29 @@ def test_12_flagship_personas():
         "buffett", "graham", "fisher", "munger",
         "lynch", "wood",
         "soros", "dalio",
-        "duan", "zhangkun",
-        "zhao_lg", "zhang_mz",
     }
-    assert flagship_ids == expected, f"flagship 应恰好是 {expected}，实际 {flagship_ids}"
+    assert flagship_ids == expected, f"flagship should be exactly {expected}, got {flagship_ids}"
 
 
 def test_flagship_has_all_required_fields():
-    """flagship 必须有 philosophy + key_metrics + voice + a_share_view."""
+    """flagship must have philosophy + key_metrics + voice."""
     from lib.personas import load_persona
-    for iid in ("buffett", "lynch", "zhao_lg", "wood", "duan"):
+    for iid in ("buffett", "lynch", "wood", "munger", "graham"):
         p = load_persona(iid)
-        assert p is not None, f"{iid} 加载失败"
-        assert p.name, f"{iid} 缺 name"
-        assert p.philosophy, f"{iid} 缺 philosophy"
-        assert len(p.key_metrics) >= 3, f"{iid} key_metrics 过少"
-        assert p.voice, f"{iid} 缺 voice"
-        assert p.a_share_view, f"{iid} 缺 a_share_view"
+        assert p is not None, f"{iid} failed to load"
+        assert p.name, f"{iid} missing name"
+        assert p.philosophy, f"{iid} missing philosophy"
+        assert len(p.key_metrics) >= 3, f"{iid} too few key_metrics"
+        assert p.voice, f"{iid} missing voice"
 
 
 def test_stub_persona_marked_correctly():
-    """stub persona 必须标记 is_flagship=False."""
+    """stub persona must be marked is_flagship=False."""
     from lib.personas import load_persona
-    # 抽样 stub
-    for iid in ("templeton", "simons", "liu_sh"):
+    for iid in ("templeton", "simons", "thorp"):
         p = load_persona(iid)
         assert p is not None
-        assert not p.is_flagship, f"{iid} 应标记为 stub"
+        assert not p.is_flagship, f"{iid} should be marked as stub"
 
 
 def test_persona_ids_match_panel_investors():
@@ -108,12 +105,12 @@ def test_build_persona_user_message_contains_persona_block():
 
 # ─── i18n ───────────────────────────────────────────────────────
 
-def test_language_instruction_default_zh():
+def test_language_instruction_default_en():
     import os
     from lib.i18n import language_instruction
     os.environ.pop("UZI_LANG", None)
     txt = language_instruction()
-    assert "中文" in txt or "zh" in txt.lower()
+    assert "English" in txt  # US edition is English-only
 
 
 def test_language_instruction_en():
@@ -132,12 +129,12 @@ def test_language_env_override():
         os.environ.pop("UZI_LANG", None)
 
 
-def test_language_falls_back_to_zh_on_unknown():
+def test_language_always_en():
     import os
     from lib.i18n import get_language
-    os.environ["UZI_LANG"] = "jp"  # unsupported
+    os.environ["UZI_LANG"] = "jp"  # ignored — US edition is English-only
     try:
-        assert get_language() == "zh"
+        assert get_language() == "en"
     finally:
         os.environ.pop("UZI_LANG", None)
 

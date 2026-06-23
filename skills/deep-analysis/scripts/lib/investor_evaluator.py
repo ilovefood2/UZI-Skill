@@ -141,14 +141,14 @@ def evaluate(investor_id: str, features: dict) -> dict:
         Layer 3 · Composite: merge rule score with reality adjustments
     """
     # v3.5.0 · 用户锁定单一流派视角 (--school A/B/C/D/E/F/G) · 其他派直接 skip
-    # 注意：未分组（group=""）的评委也 skip · 锁定就是锁定 · 不漏网
+    # Note: ungrouped jurors (group="") also skip — a lock is a lock.
     locked = get_locked_school()
     if locked:
         inv_group = _INVESTOR_GROUP_MAP.get(investor_id, "")
         if inv_group != locked:
             return _skip_result(
                 investor_id,
-                f"用户锁定 {SCHOOL_LABELS.get(locked, locked)} 派视角 · 非该派评委不参与",
+                f"User locked to school {locked} ({SCHOOL_LABELS.get(locked, locked)}) — jurors outside this school do not participate",
             )
 
     # ─── Layer 1: Reality Check ───

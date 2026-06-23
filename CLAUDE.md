@@ -1,40 +1,42 @@
-# UZI-Skill · Claude Code Context
+# UZI-Skill (US edition) · Claude Code Context
 
-> 本文件供 Claude Code 自动读取，提供项目上下文。
+> Auto-read by Claude Code to provide project context.
 
-## 这是什么
+## What this is
 
-一个股票深度分析 plugin。用户说"分析 XXX"时，你应该自动触发 `deep-analysis` skill。
+A US-stock deep-analysis plugin. When the user says "analyze TICKER", you should
+trigger the `deep-analysis` skill. **US-listed equities only** — A-share / Hong
+Kong tickers and Chinese company names are rejected up front with a clear message.
+All output is in English.
 
-## 核心技能
+## Core skills
 
-| Skill | 触发条件 | 说明 |
+| Skill | Trigger | Notes |
 |---|---|---|
-| `deep-analysis` | 用户提到"分析/研究/估值/DCF/值不值得买"等 | 22维数据 + 66评委 + Bloomberg报告 |
-| `investor-panel` | 用户要求"只看评委/大佬怎么看" | 单独跑投资者面板 |
-| `lhb-analyzer` | 用户提到"龙虎榜/游资/营业部" | 龙虎榜专项分析 |
-| `trap-detector` | 用户提到"杀猪盘/有没有问题/安全吗" | 杀猪盘检测 |
+| `deep-analysis` | "analyze / research / value / DCF / is it worth buying" | 15 data dims + 35-investor jury + Bloomberg report |
+| `investor-panel` | "just show the jury / what would the legends think" | Run the investor panel on its own |
 
-## 工作流 · 深浅两档（v2.10.6）
+## Workflow · two depths
 
-**快速路径（默认）**：用户说"分析/看看"时，优先走 CLI 直跑。
+**Fast path (default):** when the user says "analyze / take a look", run the CLI directly.
 ```
-python3 run.py <ticker> --depth lite --no-browser   # 30-60s
-# 或
-python3 run.py <ticker> --depth medium --no-browser # 2-4min，默认完整度
+python3 run.py <TICKER> --depth lite --no-browser   # 30-60s
+python3 run.py <TICKER> --depth medium --no-browser # 2-4min, default completeness
 ```
-v2.10.4 起 CLI 直跑 `agent_analysis.json` 缺失自动降级 warning，照样出 HTML 报告。**不需要 role-play 66 评委**。
+If `agent_analysis.json` is missing, the CLI degrades to a warning and still emits the
+HTML report. **No need to role-play the 35 jurors.**
 
-**深度路径**：仅当用户明确要 DCF / IC memo / 首次覆盖 / 投委会备忘录等深度产物时走两段式：
-1. `stage1()` — 脚本采集数据 + 规则引擎骨架分
-2. **你介入** — 读 `panel.json`，role-play 66 评委，写 `agent_analysis.json`
-3. `stage2()` — 自动合并你的分析，生成报告
+**Deep path:** only when the user explicitly wants DCF / IC memo / initiation /
+investment-committee deliverables, use the two-stage flow:
+1. `stage1()` — script collects data + rule-engine skeleton scores
+2. **You step in** — read `panel.json`, role-play the 35 jurors, write `agent_analysis.json`
+3. `stage2()` — merges your analysis and generates the report
 
-详细流程见 `AGENTS.md` / `skills/deep-analysis/SKILL.md`。
+See `AGENTS.md` / `skills/deep-analysis/SKILL.md` for the full flow.
 
-## 重要文件
+## Key files
 
-- `AGENTS.md` — 完整 agent 指令
-- `skills/deep-analysis/SKILL.md` — 深度分析工作流
-- `skills/deep-analysis/scripts/run_real_test.py` — 主引擎
-- `commands/analyze-stock.md` — `/analyze-stock` 命令
+- `AGENTS.md` — full agent instructions
+- `skills/deep-analysis/SKILL.md` — deep-analysis workflow
+- `skills/deep-analysis/scripts/run_real_test.py` — main engine
+- `commands/analyze-stock.md` — the `/analyze-stock` command
