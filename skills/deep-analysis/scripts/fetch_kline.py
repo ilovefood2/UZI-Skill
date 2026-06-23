@@ -194,7 +194,7 @@ def fetch_chip_distribution(ti) -> dict:
         return {"error": str(e)}
 
 
-STAGE_LABEL = {0: "—", 1: "Stage 1 底部", 2: "Stage 2 上升", 3: "Stage 3 顶部", 4: "Stage 4 下跌"}
+STAGE_LABEL = {0: "—", 1: "Stage 1 Bottom", 2: "Stage 2 Advance", 3: "Stage 3 Top", 4: "Stage 4 Decline"}
 
 
 def _extract_for_viz(klines: list[dict]) -> dict:
@@ -284,10 +284,10 @@ def main(ticker: str) -> dict:
 
     # Derive stage / ma_align / macd / rsi human labels from indicators
     stage_label = STAGE_LABEL.get(indicators.get("stage", 0), "—")
-    ma_align = "多头排列" if indicators.get("ma_bull_alignment") else "非多头"
-    macd_label = "金叉水上" if (indicators.get("macd_golden_cross") and indicators.get("macd_dif", 0) > 0) else (
-        "死叉水上" if (indicators.get("macd_dif", 0) > 0 and indicators.get("macd_hist", 0) < 0) else
-        "水下" if indicators.get("macd_dif", 0) < 0 else "中性"
+    ma_align = "Bullish alignment" if indicators.get("ma_bull_alignment") else "Not bullish"
+    macd_label = "Golden cross, above zero" if (indicators.get("macd_golden_cross") and indicators.get("macd_dif", 0) > 0) else (
+        "Death cross, above zero" if (indicators.get("macd_dif", 0) > 0 and indicators.get("macd_hist", 0) < 0) else
+        "Below zero" if indicators.get("macd_dif", 0) < 0 else "Neutral"
     )
     rsi_val = indicators.get("rsi_14")
     rsi_label = f"{rsi_val:.0f}" if rsi_val is not None else "—"

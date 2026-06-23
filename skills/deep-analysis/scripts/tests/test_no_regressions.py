@@ -100,17 +100,18 @@ def test_all_modules_have_future_annotations():
 
 
 # ─── BUG (v2.6.1) · dim_commentary 必须覆盖 22 维 ──
-def test_dim_labels_covers_all_22_dims():
+def test_dim_labels_covers_kept_dims():
+    """US edition: dim_labels covers the 15 kept dimensions."""
     src = (((SCRIPTS_DIR / "run_real_test.py").read_text(encoding="utf-8")) + "\n" + (SCRIPTS_DIR / "lib" / "pipeline" / "score_fns.py").read_text(encoding="utf-8"))
     idx = src.find("dim_labels = {")
     assert idx > 0, "dim_labels not found"
-    # Find closing brace
     end = src.find("}", idx)
     block = src[idx:end]
-    expected_dims = [f"{i}_" for i in range(20)]
-    missing = [d for d in expected_dims if d not in block]
-    assert len(missing) <= 1, \
-        f"BUG#v2.6.1 regression: dim_labels 应覆盖 22 维，缺失 {missing}"
+    kept_dims = ["0_basic", "1_financials", "2_kline", "3_macro", "4_peers",
+                 "5_chain", "6_research", "7_industry", "8_materials",
+                 "10_valuation", "11_governance", "14_moat", "15_events", "17_sentiment"]
+    missing = [d for d in kept_dims if d not in block]
+    assert not missing, f"dim_labels missing kept dims: {missing}"
 
 
 # ─── BUG (v2.6.1) · auto_summarize 不能用占位符 ──
@@ -172,22 +173,10 @@ def test_xueqiu_browser_opt_in_only():
     assert "PROFILE_DIR" in src, "BUG#R5 regression: 必须用持久化 profile 保存 cookie"
 
 
-# ─── BUG#R6 (v2.7.1) · auto_summarize 18_trap/19_contests 必须透明 ──
-def test_auto_summarize_trap_contests_transparent():
-    src = (((SCRIPTS_DIR / "run_real_test.py").read_text(encoding="utf-8")) + "\n" + (SCRIPTS_DIR / "lib" / "pipeline" / "score_fns.py").read_text(encoding="utf-8"))
-    fn_idx = src.find("def _auto_summarize_dim")
-    assert fn_idx > 0
-    end = src.find("def generate_synthesis", fn_idx)
-    block = src[fn_idx:end]
-    # 18_trap 应显示 "已扫" 类透明字眼，不能是 "暂无" 或 "(empty)"
-    assert "8 信号扫描" in block, \
-        "BUG#R6 regression: 18_trap auto-summary 必须显示 8 信号扫描状态"
-    # 19_contests 应处理 login_required 情况
-    assert "需登录" in block or "login_required" in block, \
-        "BUG#R5/R6 regression: 19_contests auto-summary 必须处理 XueQiu 登录态"
+# (US edition) 18_trap / 19_contests auto-summary test removed — those dims are China-only.
 
 
-# ─── 整体烟测：所有模块在 Py3.9 能 import ──
+# ─── smoke: all modules import on Py3.9 ──
 def test_all_lib_imports_ok():
     import importlib
     failures = []

@@ -345,15 +345,13 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
     # 譬如白马消费股：价值派 85 分（重仓），技术派 30 分（趋势破位）·
     # 现在可以一眼看出"不同哲学得出的结论有多不同"
     GROUP_META = {
-        "A": {"label": "经典价值派", "desc": "巴菲特 / 格雷厄姆 / 费雪 / 芒格 一脉"},
-        "B": {"label": "成长派",     "desc": "彼得·林奇 / 欧奈尔 / 蒂尔 / 伍德 一脉"},
-        "C": {"label": "宏观派",     "desc": "索罗斯 / 达利欧 / 马克斯 一脉"},
-        "D": {"label": "技术派",     "desc": "利弗莫尔 / Minervini / 达瓦斯 一脉"},
-        "E": {"label": "中式价投",   "desc": "段永平 / 张坤 / 朱少醒 / 冯柳 一脉"},
-        "F": {"label": "A 股游资",   "desc": "龙虎榜顶流 23 位·章盟主/孙哥/赵老哥为代表"},
-        "G": {"label": "量化派",     "desc": "Simons / Thorp / Shaw 一脉"},
-        "H": {"label": "科技领袖派", "desc": "黄仁勋 / 马斯克 / Altman / Saylor 一脉"},
-        "I": {"label": "AI 卡位/瓶颈猎手", "desc": "Serenity · AI 供应链卡脖子/瓶颈点"},
+        "A": {"label": "Classic Value", "desc": "Buffett / Graham / Fisher / Munger lineage"},
+        "B": {"label": "Growth",        "desc": "Lynch / O'Neil / Thiel / Wood lineage"},
+        "C": {"label": "Macro",         "desc": "Soros / Dalio / Marks lineage"},
+        "D": {"label": "Technical",     "desc": "Livermore / Minervini / Darvas lineage"},
+        "G": {"label": "Quant",         "desc": "Simons / Thorp / Shaw lineage"},
+        "H": {"label": "Tech Leaders",  "desc": "Jensen Huang / Musk / Altman / Saylor lineage"},
+        "I": {"label": "AI Bottleneck Hunter", "desc": "Serenity · AI supply-chain chokepoints"},
     }
 
     def _consensus_to_verdict(c: float) -> str:
@@ -448,12 +446,12 @@ def generate_panel(dims_scored: dict, raw: dict) -> dict:
 # ─────────────────────────────────────────────────────────────
 def _auto_summarize_dim(dim_key: str, label: str, dim: dict, score: float) -> str:
     """Build a one-paragraph commentary from raw_data fields. NEVER returns
-    "[占位]" type strings — either real content or empty."""
+    placeholder strings — either real content or empty."""
     if not isinstance(dim, dict):
         return ""
     data = dim.get("data") or {}
     if not data:
-        return f"{label}：未拉取到数据（fetcher 失败或返回空）。"
+        return f"{label}: no data fetched (fetcher failed or returned empty)."
 
     def _v(*keys, default="—"):
         for k in keys:
@@ -462,7 +460,7 @@ def _auto_summarize_dim(dim_key: str, label: str, dim: dict, score: float) -> st
                 return v
         return default
 
-    def _join_list(lst, max_n=3, sep="；"):
+    def _join_list(lst, max_n=3, sep="; "):
         if not isinstance(lst, list) or not lst:
             return None
         out = []
@@ -476,147 +474,93 @@ def _auto_summarize_dim(dim_key: str, label: str, dim: dict, score: float) -> st
 
     # ─── Per-dim auto summarizer ───
     if dim_key == "0_basic":
-        return f"{label}：{_v('name')}（{_v('code')}），{_v('industry')} 行业。市值 {_v('market_cap')}，PE {_v('pe_ttm')}，PB {_v('pb')}。"
+        return f"{label}: {_v('name')} ({_v('code')}), {_v('industry')} sector. Market cap {_v('market_cap')}, P/E {_v('pe_ttm')}, P/B {_v('pb')}."
 
     if dim_key == "1_financials":
         roe = _v("roe_latest", "roe")
         rev_g = _v("revenue_growth_yoy", "revenue_yoy")
         np_g = _v("net_profit_yoy")
         margin = _v("net_margin", "gross_margin")
-        return f"{label}：ROE {roe}，营收同比 {rev_g}，净利同比 {np_g}，净利率 {margin}。综合得分 {score}/10。"
+        return f"{label}: ROE {roe}, revenue YoY {rev_g}, net profit YoY {np_g}, net margin {margin}. Score {score}/10."
 
     if dim_key == "2_kline":
         stage = _v("stage", "wyckoff_stage")
         ma = _v("ma_align", "trend")
         macd = _v("macd")
-        return f"{label}：{stage} · 均线 {ma} · MACD {macd}。"
+        return f"{label}: {stage} · MA {ma} · MACD {macd}."
 
     if dim_key == "3_macro":
-        return (f"{label}：利率周期 {_v('rate_cycle')}；汇率 {_v('fx_trend')}；"
-                f"地缘 {_v('geo_risk')}；大宗商品 {_v('commodity', 'commodity_trend')}。"
-                f"得分 {score}/10。")
+        return (f"{label}: rate cycle {_v('rate_cycle')}; FX {_v('fx_trend')}; "
+                f"geopolitics {_v('geo_risk')}; commodities {_v('commodity', 'commodity_trend')}. "
+                f"Score {score}/10.")
 
     if dim_key == "4_peers":
         rank = _v("rank")
         peer_table = data.get("peer_table") or []
         ind = _v("industry")
-        peers_str = _join_list([p.get("name") for p in peer_table if isinstance(p, dict) and not p.get("is_self")][:5], max_n=5, sep="、")
-        return f"{label}：{ind} 行业，{rank}{('，主要同行：' + peers_str) if peers_str else ''}。得分 {score}/10。"
+        peers_str = _join_list([p.get("name") for p in peer_table if isinstance(p, dict) and not p.get("is_self")][:5], max_n=5, sep=", ")
+        return f"{label}: {ind} sector, {rank}{(', key peers: ' + peers_str) if peers_str else ''}. Score {score}/10."
 
     if dim_key == "5_chain":
-        return f"{label}：上游 {_v('upstream')}；下游 {_v('downstream')}；客户集中度 {_v('client_concentration')}。"
+        return f"{label}: upstream {_v('upstream')}; downstream {_v('downstream')}; customer concentration {_v('client_concentration')}."
 
     if dim_key == "6_research":
         rep_count = _v("report_count", "n_reports")
         target = _v("avg_target_price", "target_price")
         rating = _v("consensus_rating", "rating")
-        return f"{label}：近期券商研报 {rep_count} 篇，一致评级 {rating}，目标价均值 {target}。"
+        return f"{label}: {rep_count} recent analyst reports, consensus rating {rating}, average target price {target}."
 
     if dim_key == "7_industry":
         ind_pe = _v("industry_pe_weighted") or (data.get("cninfo_metrics") or {}).get("industry_pe_weighted")
         ind_count = _v("total_companies") or (data.get("cninfo_metrics") or {}).get("company_count")
         growth = _v("growth")
-        return f"{label}：所属 {_v('industry')} · 行业 PE 加权 {ind_pe} · 上市公司数 {ind_count} · 增速 {growth}。"
+        return f"{label}: sector {_v('industry')} · weighted industry P/E {ind_pe} · listed companies {ind_count} · growth {growth}."
 
     if dim_key == "8_materials":
         core = _v("core_material")
         trend = _v("price_trend")
         cost = _v("cost_share")
-        return f"{label}：核心原料 {core}；近期价格走势 {trend}；占成本比例 {cost}。"
-
-    if dim_key == "9_futures":
-        contract = _v("linked_contract")
-        ftrend = _v("contract_trend")
-        return f"{label}：关联合约 {contract}；近期走势 {ftrend}；{_v('note', default='')}。"
+        return f"{label}: core input {core}; recent price trend {trend}; share of cost {cost}."
 
     if dim_key == "10_valuation":
         pe_q = _v("pe_quantile_5y", "pe_quantile")
         pb_q = _v("pb_quantile_5y", "pb_quantile")
-        return f"{label}：PE 5 年分位 {pe_q}，PB 5 年分位 {pb_q}。得分 {score}/10。"
+        return f"{label}: P/E 5-yr percentile {pe_q}, P/B 5-yr percentile {pb_q}. Score {score}/10."
 
     if dim_key == "11_governance":
         ctrl = _v("actual_controller")
         recent = _v("recent_changes", "recent_holdings_change")
-        return f"{label}：实控人 {ctrl}；近期变动 {recent}。"
-
-    if dim_key == "12_capital_flow":
-        north = _v("north_holding_pct", "north_change_5d", default=None)
-        margin = _v("margin_balance", default=None)
-        if north or margin:
-            return f"{label}：北向持股 {north or '—'}；融资余额 {margin or '—'}。"
-        return f"{label}：{_v('_note', default='资金面数据有限')}。"
-
-    if dim_key == "13_policy":
-        snippets = data.get("snippets") or {}
-        non_empty = {k: v for k, v in snippets.items() if v}
-        if non_empty:
-            preview = "；".join(f"{k}: {len(v) if isinstance(v, list) else 1} 条" for k, v in non_empty.items())
-            return f"{label}：{_v('industry', default='本行业')} {_v('year', default='')} 年政策检索：{preview}。"
-        return f"{label}：{_v('industry', default='本行业')} 政策搜索未命中具体内容（建议 web_search 补抓）。"
+        return f"{label}: controlling owner {ctrl}; recent changes {recent}."
 
     if dim_key == "14_moat":
         scores = data.get("scores") or {}
         total = sum(scores.values()) if scores else None
         if total is not None:
-            return f"{label}：四力评分 无形资产 {scores.get('intangible')}/10、转换成本 {scores.get('switching')}/10、网络效应 {scores.get('network')}/10、规模 {scores.get('scale')}/10 · 综合 {total}/40。"
-        return f"{label}：评估数据有限，得分 {score}/10。"
+            return f"{label}: four-forces score — intangibles {scores.get('intangible')}/10, switching cost {scores.get('switching')}/10, network effects {scores.get('network')}/10, scale {scores.get('scale')}/10 · total {total}/40."
+        return f"{label}: limited data, score {score}/10."
 
     if dim_key == "15_events":
         timeline = data.get("event_timeline") or []
         recent_news = data.get("recent_news") or []
         if timeline:
-            head = "；".join([str(t)[:60] for t in timeline[:3]])
-            return f"{label}：近期事件 {len(timeline)} 条，含：{head}。"
+            head = "; ".join([str(t)[:60] for t in timeline[:3]])
+            return f"{label}: {len(timeline)} recent events, incl.: {head}."
         if recent_news:
-            head = "；".join([(n.get("title") or "")[:60] for n in recent_news[:3]])
-            return f"{label}：近期新闻 {len(recent_news)} 条，含：{head}。"
-        return f"{label}：暂无显著事件（fetcher 返回空）。"
-
-    if dim_key == "16_lhb":
-        n = _v("recent_lhb_count", "n_lhb_30d", default=None)
-        seats = data.get("recent_seats") or data.get("top_seats") or []
-        if n or seats:
-            seat_str = "、".join([s.get("name", "") for s in seats[:3] if isinstance(s, dict)]) if seats else ""
-            return f"{label}：近 30 天上榜 {n or '—'} 次{('，主要席位：' + seat_str) if seat_str else ''}。"
-        return f"{label}：近期未上龙虎榜或非 A 股。"
+            head = "; ".join([(n.get("title") or "")[:60] for n in recent_news[:3]])
+            return f"{label}: {len(recent_news)} recent news items, incl.: {head}."
+        return f"{label}: no notable events (fetcher returned empty)."
 
     if dim_key == "17_sentiment":
         hot = _v("hot_rank", "hot_score")
         senti = _v("sentiment_label", "sentiment")
-        return f"{label}：热度 {hot}；情绪 {senti}。"
-
-    if dim_key == "18_trap":
-        # v2.7.1: 字段名其实是 signals_hit_count（不是 hit_signals_count），修；显示 8 信号扫描结果
-        level = _v("trap_level", "level")
-        n_signals = data.get("signals_hit_count", data.get("hit_signals_count", 0))
-        scanned = data.get("signals_hit", "?/8")
-        rec = _v("recommendation")
-        detail = data.get("signals_hit_detail") or []
-        if detail:
-            kws = [s.get("name", "") for s in detail[:3]]
-            return f"{label}：{level} · 8 信号扫描命中 {scanned}（{('、'.join(kws))}）· 建议：{rec}"
-        return f"{label}：{level} · 8 信号扫描命中 {scanned}（已扫 ddgs 24 条搜索结果）· 建议：{rec}"
-
-    if dim_key == "19_contests":
-        # v2.7.1: 字段名是 summary.xueqiu_cubes_total，不是 contests_count；要看 login_required
-        summary = data.get("summary") or {}
-        n_cubes = summary.get("xueqiu_cubes_total", 0)
-        n_high = summary.get("high_return_cubes", 0)
-        login_req = summary.get("xueqiu_login_required", False)
-        src = summary.get("xueqiu_source", "http")
-        if login_req and n_cubes == 0:
-            return (f"{label}：⚠️ XueQiu cubes 接口需登录（2026 起新政），未启用 → 0 cube。"
-                    f"启用方式：export UZI_XQ_LOGIN=1 + python -m lib.xueqiu_browser login")
-        if n_cubes:
-            return f"{label}：雪球 {n_cubes} 个组合持有本股（高收益 >50% 的有 {n_high} 个）· 来源 {src}"
-        return f"{label}：雪球 0 个组合持有本股（可能小盘 / 冷门 / 接口未返）"
+        return f"{label}: heat {hot}; sentiment {senti}."
 
     # Default: just enumerate top fields
     items = []
     for k, v in list(data.items())[:5]:
         if v not in (None, "", "—", "-", [], {}) and not str(k).startswith("_"):
             items.append(f"{k}={str(v)[:30]}")
-    return f"{label}：{'、'.join(items) if items else '无数据'}。" if items else ""
+    return f"{label}: {', '.join(items) if items else 'no data'}." if items else ""
 
 
 # v2.12.1 · MX/ddgs 返回垃圾数据的黑名单
@@ -875,38 +819,37 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
     #         看不出差异"。50-65 这个 15 分跨度太宽 · 拆成 50-55 / 55-60 / 60-65 三档 ·
     #         同时把流派分歧度作为后缀显示让差异更明显.
     if overall >= 80:
-        verdict_label = "值得重仓"
+        verdict_label = "Strong Buy"
     elif overall >= 70:
-        verdict_label = "可以蹲一蹲"
+        verdict_label = "Worth Accumulating"
     elif overall >= 65:
-        verdict_label = "可以蹲（偏弱）"   # v3.4.1 新增细分
+        verdict_label = "Worth Accumulating (weak)"
     elif overall >= 60:
-        verdict_label = "观望偏多"          # v3.4.1 新增细分
+        verdict_label = "Watch (lean long)"
     elif overall >= 55:
-        verdict_label = "观望中性"          # v3.4.1 新增细分
+        verdict_label = "Watch (neutral)"
     elif overall >= 50:
-        verdict_label = "观望偏空"          # v3.4.1 新增细分
+        verdict_label = "Watch (lean short)"
     elif overall >= 35:
-        verdict_label = "谨慎"
+        verdict_label = "Cautious"
     else:
-        verdict_label = "回避"
+        verdict_label = "Avoid"
 
-    # v3.4.1 · 追加流派分歧指标 · 让用户能看到"5 派看空 + 2 派看多"这种结构信息
+    # School-divergence suffix so users can see e.g. "5 schools bearish / 2 bullish"
     school_scores = panel.get("school_scores", {})
     if school_scores:
         bullish_schools = [s["label"] for s in school_scores.values()
-                          if s.get("verdict") in ("重仓", "买入")]
+                          if s.get("verdict") in ("Overweight", "Buy")]
         bearish_schools = [s["label"] for s in school_scores.values()
-                          if s.get("verdict") == "回避"]
+                          if s.get("verdict") == "Avoid"]
         if bullish_schools and bearish_schools:
-            verdict_label += f" · {len(bullish_schools)} 派看多 / {len(bearish_schools)} 派看空"
+            verdict_label += f" · {len(bullish_schools)} schools bullish / {len(bearish_schools)} bearish"
         elif bullish_schools:
-            verdict_label += f" · {len(bullish_schools)} 派看多"
+            verdict_label += f" · {len(bullish_schools)} schools bullish"
         elif bearish_schools:
-            verdict_label += f" · {len(bearish_schools)} 派看空"
+            verdict_label += f" · {len(bearish_schools)} schools bearish"
 
-    # v3.4.1 · 同时记 verdict_detail · 含 fund + consensus 精确分（让相近股票能区分）
-    verdict_detail = f"基本面 {fund_score:.1f} · 共识 {consensus:.1f}"
+    verdict_detail = f"Fundamentals {fund_score:.1f} · Consensus {consensus:.1f}"
 
     # Pick bull and bear for great divide
     # CRITICAL: must pick from ACTUALLY bullish/bearish investors, never misattribute
@@ -968,13 +911,13 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
         },
         {
             "round": 2,
-            "bull_say": agent_bull_rounds[1] if len(agent_bull_rounds) > 1 else (" · ".join(r.get("msg", r.get("name", "")) for r in bull_pass_rules[:3]) or "数据支持我的判断。"),
-            "bear_say": agent_bear_rounds[1] if len(agent_bear_rounds) > 1 else (" · ".join(r.get("msg", r.get("name", "")) for r in bear_fail_rules[:3]) or "风险点太多。"),
+            "bull_say": agent_bull_rounds[1] if len(agent_bull_rounds) > 1 else (" · ".join(r.get("msg", r.get("name", "")) for r in bull_pass_rules[:3]) or "The data supports my call."),
+            "bear_say": agent_bear_rounds[1] if len(agent_bear_rounds) > 1 else (" · ".join(r.get("msg", r.get("name", "")) for r in bear_fail_rules[:3]) or "Too many risk points."),
         },
         {
             "round": 3,
-            "bull_say": agent_bull_rounds[2] if len(agent_bull_rounds) > 2 else f"综合看，{bull.get('score', 0)} 分，我的立场不变。",
-            "bear_say": agent_bear_rounds[2] if len(agent_bear_rounds) > 2 else f"综合看，{bear.get('score', 0)} 分，风险大于收益。",
+            "bull_say": agent_bull_rounds[2] if len(agent_bull_rounds) > 2 else f"On balance, {bull.get('score', 0)}/100 — my stance is unchanged.",
+            "bear_say": agent_bear_rounds[2] if len(agent_bear_rounds) > 2 else f"On balance, {bear.get('score', 0)}/100 — risk outweighs reward.",
         },
     ]
 
@@ -1003,15 +946,15 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
         punchline = agent_punchline
     elif dcf_sm and lbo_irr and abs(dcf_sm) > 10 and lbo_irr > 15:
         if dcf_sm < 0 and lbo_irr > 20:
-            punchline = f"DCF 说高估 {abs(dcf_sm):.0f}%，但 LBO 测试显示 PE 买方仍能赚 {lbo_irr:.0f}% IRR — 冲突很有意思。"
+            punchline = f"DCF says {abs(dcf_sm):.0f}% overvalued, but the LBO test shows a PE buyer could still earn {lbo_irr:.0f}% IRR — an interesting conflict."
         elif dcf_sm > 15 and lbo_irr > 20:
-            punchline = f"DCF 认为低估 {dcf_sm:.0f}%，LBO IRR {lbo_irr:.0f}% 也确认 — 双重信号看多。"
+            punchline = f"DCF sees {dcf_sm:.0f}% undervalued, and the LBO IRR of {lbo_irr:.0f}% confirms it — a double bullish signal."
         else:
-            punchline = f"机构建模定调 {rating}，目标价 ¥{tp}（{upside:+.0f}%），LBO 视角 IRR {lbo_irr:.0f}%。"
+            punchline = f"Institutional models settle on {rating}, target ${tp} ({upside:+.0f}%), LBO-view IRR {lbo_irr:.0f}%."
     elif tp > 0 and abs(upside) > 5:
-        punchline = f"首次覆盖 {rating}，目标价 ¥{tp}，空间 {upside:+.0f}%。"
+        punchline = f"Initiation {rating}, target ${tp}, upside {upside:+.0f}%."
     else:
-        punchline = f"{name} · ROE 历史与当前估值存在结构性分歧，等待方向明朗。"
+        punchline = f"{name} · a structural disagreement between historical ROE and current valuation — waiting for direction."
 
     # Risks: prefer agent-written, fallback to script generation from low-scoring dims
     narrative_override = ag.get("narrative_override") or {}
@@ -1026,7 +969,7 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
                 else:
                     # Use dim name as fallback
                     dim_name = dim.get("name") or dim.get("label") or key
-                    risks.append(f"{dim_name} 评分偏低 ({dim['score']}/10)")
+                    risks.append(f"{dim_name} scores low ({dim['score']}/10)")
 
     # If still empty, generate dynamic risks from actual data instead of hardcoded ones
     if not risks:
@@ -1038,18 +981,18 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
             pe_val = _f.get("pe", 0)
             debt_val = _f.get("debt_ratio", 0)
             roe_min = _f.get("roe_5y_min", 0)
-            industry = _f.get("industry", "所属行业")
+            industry = _f.get("industry", "the sector")
         except Exception:
-            pe_val, debt_val, roe_min, industry = 0, 0, 0, "所属行业"
+            pe_val, debt_val, roe_min, industry = 0, 0, 0, "the sector"
 
         if pe_val > 30:
-            risks.append(f"当前 PE {pe_val:.0f}x，估值偏高")
+            risks.append(f"P/E of {pe_val:.0f}x — valuation is rich")
         if debt_val > 50:
-            risks.append(f"资产负债率 {debt_val:.0f}%，财务杠杆偏高")
+            risks.append(f"debt ratio {debt_val:.0f}% — financial leverage is high")
         if roe_min < 5:
-            risks.append(f"ROE 最低 {roe_min:.1f}%，盈利稳定性不足")
-        risks.append(f"{industry}行业竞争加剧风险")
-        risks.append("宏观经济或政策环境变化")
+            risks.append(f"ROE bottoms at {roe_min:.1f}% — inconsistent profitability")
+        risks.append(f"intensifying competition in {industry}")
+        risks.append("changes in the macro or policy environment")
 
     risks = risks[:5]
 
@@ -1061,7 +1004,7 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
     # Dashboard — core_conclusion: agent override > script
     ytd_return = (kline.get("kline_stats") or {}).get("ytd_return", "—")
     agent_core_conclusion = narrative_override.get("core_conclusion") or ""
-    core_conclusion = agent_core_conclusion or f"{name} · {int(overall)} 分 · {verdict_label}。51 位大佬里 {panel['signal_distribution']['bullish']} 人看多，YTD {ytd_return}。{punchline}"
+    core_conclusion = agent_core_conclusion or f"{name} · {int(overall)}/100 · {verdict_label}. {panel['signal_distribution']['bullish']} of 35 investors bullish, YTD {ytd_return}. {punchline}"
 
     # v2.2 · dim_commentary: prefer agent-written, fallback to AUTO-SUMMARY (v2.6.1)
     # 关键修复：原 fallback 只生成 "[脚本占位]" 字符串，导致直跑模式下报告里
@@ -1069,26 +1012,20 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
     agent_dim_commentary = ag.get("dim_commentary") or {}
     dim_commentary_final: dict[str, str] = {}
     dim_labels = {
-        "0_basic": "基础信息",
-        "1_financials": "财报",
-        "2_kline": "K线技术面",
-        "3_macro": "宏观环境",
-        "4_peers": "同行对比",
-        "5_chain": "产业链",
-        "6_research": "券商研报",
-        "7_industry": "行业景气",
-        "8_materials": "原材料",
-        "9_futures": "期货关联",
-        "10_valuation": "估值分位",
-        "11_governance": "治理/减持",
-        "12_capital_flow": "资金面",
-        "13_policy": "政策与监管",
-        "14_moat": "护城河",
-        "15_events": "事件驱动",
-        "16_lhb": "龙虎榜",
-        "17_sentiment": "舆情",
-        "18_trap": "杀猪盘",
-        "19_contests": "实盘比赛",
+        "0_basic": "Basic info",
+        "1_financials": "Financials",
+        "2_kline": "Price / technicals",
+        "3_macro": "Macro backdrop",
+        "4_peers": "Peer comparison",
+        "5_chain": "Supply chain",
+        "6_research": "Analyst research",
+        "7_industry": "Industry outlook",
+        "8_materials": "Raw materials",
+        "10_valuation": "Valuation percentile",
+        "11_governance": "Governance",
+        "14_moat": "Moat",
+        "15_events": "Event-driven",
+        "17_sentiment": "Sentiment",
     }
     for dim_key, label in dim_labels.items():
         # Agent-written commentary takes priority
@@ -1145,7 +1082,7 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
         "agent_reviewed": bool(ag.get("agent_reviewed")),
         "panel_insights": ag.get("panel_insights") or "",
         "claude_narrative_stub": {
-            "_note": "以下字段已由 agent 覆盖" if ag.get("agent_reviewed") else "以下字段是脚本生成的占位，Task 4 中 Claude 必须根据原始数据重写",
+            "_note": "Fields below have been overwritten by the agent" if ag.get("agent_reviewed") else "Fields below are script-generated placeholders; in Task 4 Claude must rewrite them from the raw data",
             "needs_rewrite": [] if ag.get("agent_reviewed") else [
                 "great_divide.punchline", "dashboard.core_conclusion",
                 "debate.rounds[*].bull_say", "debate.rounds[*].bear_say",
@@ -1182,24 +1119,24 @@ def generate_synthesis(raw: dict, dims_scored: dict, panel: dict, agent_analysis
             "core_conclusion": core_conclusion,
             "data_perspective": {
                 "trend": f"{kline.get('stage', '—')}",
-                "price": f"¥{price}" if price else "—",
+                "price": f"${price}" if price else "—",
                 "volume": "—",
                 "chips": kline.get("ma_align", "—"),
             },
             "intelligence": {
-                "news": "近期新闻 + 公告已采集",
+                "news": "Recent news + filings collected",
                 "risks": risks[:3],
                 "catalysts": [
-                    e.get("event", "季报")[:30]
+                    e.get("event", "Earnings")[:30]
                     for e in ((d21.get("catalyst_calendar") or {}).get("events") or [])
                     if e.get("impact") in ("high", "medium")
-                ][:3] or ["季报窗口", "行业事件"],
+                ][:3] or ["Earnings window", "Industry events"],
             },
             "battle_plan": {
-                "entry": f"¥{round(price * 0.92, 2) if price else '—'}",
-                "position": "50% 起步",
-                "stop": f"¥{round(price * 0.85, 2) if price else '—'}",
-                "target": f"¥{round(price * 1.25, 2) if price else '—'}",
+                "entry": f"${round(price * 0.92, 2) if price else '—'}",
+                "position": "Start at 50%",
+                "stop": f"${round(price * 0.85, 2) if price else '—'}",
+                "target": f"${round(price * 1.25, 2) if price else '—'}",
             },
         },
     }

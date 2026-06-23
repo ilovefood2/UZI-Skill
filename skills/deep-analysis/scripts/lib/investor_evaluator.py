@@ -276,18 +276,18 @@ def _build_headline(signal: str, pass_list: list, fail_list: list) -> str:
     """One-sentence takeaway citing the top rule."""
     if signal == "bullish" and pass_list:
         top = pass_list[0]
-        return f"看多核心：{top['msg']}"
+        return f"Bull case: {top['msg']}"
     if signal == "bearish" and fail_list:
         top = fail_list[0]
-        return f"看空核心：{top['msg']}"
+        return f"Bear case: {top['msg']}"
     # neutral — cite most important passed + most important failed
     if pass_list and fail_list:
-        return f"观望：{pass_list[0]['msg']}；但 {fail_list[0]['msg']}"
+        return f"Watch: {pass_list[0]['msg']}; but {fail_list[0]['msg']}"
     if pass_list:
-        return f"中性：{pass_list[0]['msg']}"
+        return f"Neutral: {pass_list[0]['msg']}"
     if fail_list:
-        return f"中性：{fail_list[0]['msg']}"
-    return "数据不足，暂无判断"
+        return f"Neutral: {fail_list[0]['msg']}"
+    return "Insufficient data, no call"
 
 
 def _build_rationale(signal: str, pass_list: list, fail_list: list) -> str:
@@ -295,16 +295,16 @@ def _build_rationale(signal: str, pass_list: list, fail_list: list) -> str:
     lines: list[str] = []
 
     if pass_list:
-        lines.append("✅ 符合标准：")
+        lines.append("✅ Criteria met:")
         for r in pass_list[:4]:
-            lines.append(f"  • [权{r['weight']}] {r['msg']}")
+            lines.append(f"  • [w{r['weight']}] {r['msg']}")
 
     if fail_list:
-        lines.append("❌ 未达标准：")
+        lines.append("❌ Criteria missed:")
         for r in fail_list[:4]:
-            lines.append(f"  • [权{r['weight']}] {r['msg']}")
+            lines.append(f"  • [w{r['weight']}] {r['msg']}")
 
-    return "\n".join(lines) if lines else "无有效规则命中"
+    return "\n".join(lines) if lines else "no rules matched"
 
 
 def _skip_result(investor_id: str, reason: str) -> dict:
